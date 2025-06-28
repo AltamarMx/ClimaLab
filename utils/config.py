@@ -32,3 +32,7 @@ longitude = -100
 gmt = -6
 name = 'ClimaLab'
 min_year = 2001
+
+# Solar constant in W/m² used for irradiance quality checks
+solar_constant = 1361
+

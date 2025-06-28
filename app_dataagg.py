@@ -5,8 +5,8 @@ from shiny import App, Inputs, Outputs, Session, render, ui, req, reactive
 from shinywidgets import render_plotly
 import faicons as fa
 
-from utils.data_processing import load_csv, run_tests, export_data
-from utils.plots import plot_all_variables
+from utils.data_processing import load_csv, run_tests, export_data, clean_outliers
+from utils.plots import plot_all_variables, plot_cleaned_radiation
 from utils.config import name
 from components.panels import panel_upload_file, panel_clean_outliers, panel_cargar_datos
 from components.helper_text import info_modal
@@ -44,6 +44,8 @@ def server(input: Inputs, output: Outputs, session: Session):
     rv_tests  = reactive.Value(None)
     rv_types   = reactive.Value(None)
     rv_plotly = reactive.Value(None)
+    rv_clean = reactive.Value(None)
+    rv_rad_plot = reactive.Value(None)
 
     @reactive.Effect
     @reactive.event(input.info_icon)
@@ -77,6 +79,11 @@ def server(input: Inputs, output: Outputs, session: Session):
             
             p.set(4, message="4/4 Plotting all data")
             rv_plotly.set(plot_all_variables(df))
+
+            # generate cleaned DataFrame and outlier plot
+            df_clean = clean_outliers(df.copy())
+            rv_clean.set(df_clean)
+            rv_rad_plot.set(plot_cleaned_radiation(df_clean))
 
 
     # load into DuckDB
@@ -131,15 +138,19 @@ def server(input: Inputs, output: Outputs, session: Session):
     @render_plotly
     def plot_plotly():
         return rv_plotly.get()
-    
-    # @render_plotly
-    # def plot_radiacion():
-    #     return rv_rad_plot.get()
+
+    @render_plotly
+    def plot_radiacion():
+        return rv_rad_plot.get()
 
 
     @render.data_frame
     def df_types():
         return rv_types.get()
+
+    @render.data_frame
+    def df_radiacion():
+        return rv_clean.get()
 
 
     @render.ui
