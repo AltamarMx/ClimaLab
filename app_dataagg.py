@@ -82,6 +82,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
             # generate cleaned DataFrame and outlier plot
             df_clean = clean_outliers(df.copy())
+            # df_clean = df.copy()
             rv_clean.set(df_clean)
             rv_rad_plot.set(plot_cleaned_radiation(df_clean))
 
@@ -91,16 +92,30 @@ def server(input: Inputs, output: Outputs, session: Session):
     @render.ui
     @reactive.event(input.btn_load)
     async def load_status():
-        df_load = export_data(req(input.archivo())[0]["datapath"])
+        df = rv_clean.get().copy()
+        
+        df = df.reset_index()
+        print(df)
+        df['TIMESTAMP'] = df['TIMESTAMP'].dt.strftime('%Y-%m-%d %H:%M')
+
+        long_df = df.melt(
+            id_vars=['TIMESTAMP'],
+            var_name='variable',
+            value_name='value'
+        )
+        long_df.columns = ['date', 'variable', 'value']
+        df_load = long_df
+
+
         with ui.Progress(min=1, max=len(df_load)) as p:
             p.set(message="Iniciando carga…")
             con = duckdb.connect('esolmet.db')
             con.execute("""
                 CREATE TABLE IF NOT EXISTS lecturas (
-                    fecha TIMESTAMP,
+                    date TIMESTAMP,
                     variable VARCHAR,
-                    valor DOUBLE,
-                    PRIMARY KEY (fecha, variable)
+                    value DOUBLE,
+                    PRIMARY KEY (date, variable)
                 );
             """)
             con.execute("BEGIN TRANSACTION;")
