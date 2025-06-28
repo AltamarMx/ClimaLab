@@ -117,7 +117,7 @@ def detect_radiation(df: pd.DataFrame, config_path: str = "configuration.ini") -
     # 6) marcar inconsistencias
     has_rad = df[rad_cols].gt(0).any(axis=1)
     night   = df["solar_altitude"] <= 0
-    df["radiation"] = ~(night & has_rad)
+    # df["radiation"] = ~(night & has_rad)
 
     return df
 
