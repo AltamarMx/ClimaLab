@@ -1,0 +1,3 @@
+**.py[cod]      # archivos compilados .pyc, .pyo, .pyd
+**.db           # bases de datos
+**/__pycache__
