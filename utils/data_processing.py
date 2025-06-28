@@ -216,23 +216,25 @@ def clean_outliers(df: pd.DataFrame) -> pd.DataFrame:
     Returns
     -------
     pandas.DataFrame
-        The input DataFrame with extra columns ``solar_altitude`` and
-        ``outlier``. Irradiance values during nighttime are set to ``NaN``.
+        The input DataFrame with an extra column ``solar_altitude`` and one
+        ``<col>_outlier`` boolean column for every irradiance variable present
+        (``dni``, ``ghi`` or ``dhi``). Irradiance values during nighttime are
+        set to ``NaN``.
     """
 
     # 1. compute solar altitude for each timestamp
     df = detect_radiation(df)
 
-    # 2. set irradiance to NaN when the sun is below the horizon
+    # 2. set irradiance to NaN when the sun is below the horizon and create
+    #    individual outlier flags
     irr_cols = [c for c in ["dni", "ghi", "dhi"] if c in df.columns]
     if irr_cols:
         night = df["solar_altitude"] < 0
         df.loc[night, irr_cols] = np.nan
 
-        # 3. mark outliers beyond the solar constant
-        df["outlier"] = df[irr_cols].gt(solar_constant).any(axis=1)
-    else:
-        df["outlier"] = False
+        # 3. mark outliers beyond the solar constant per column
+        for col in irr_cols:
+            df[f"{col}_outlier"] = df[col] > solar_constant
 
     return df
 
