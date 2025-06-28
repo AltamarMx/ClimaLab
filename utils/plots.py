@@ -105,21 +105,21 @@ def graficado_radiacion(path_archivo: str, rad_columns: list[str] = None) -> go.
 
 
 def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
-    """Plot irradiance data highlighting detected outliers."""
+    """Plot irradiance data highlighting detected outliers per variable."""
 
     df_plot = df.reset_index()
     df_plot["TIMESTAMP"] = df_plot["TIMESTAMP"].dt.strftime("%Y-%m-%d %H:%M")
 
     fig = go.Figure()
     irr_cols = [c for c in ["dni", "ghi", "dhi"] if c in df_plot.columns]
-    out = df_plot.get("outlier", pd.Series(False, index=df_plot.index))
 
     colors = {"dni": "#1f77b4", "ghi": "#2ca02c", "dhi": "#ff7f0e"}
     for col in irr_cols:
+        flag = df_plot.get(f"{col}_outlier", pd.Series(False, index=df_plot.index))
         fig.add_trace(
             go.Scattergl(
-                x=df_plot.loc[~out, "TIMESTAMP"],
-                y=df_plot.loc[~out, col],
+                x=df_plot.loc[~flag, "TIMESTAMP"],
+                y=df_plot.loc[~flag, col],
                 mode="markers",
                 name=col,
                 marker=dict(size=5, color=colors.get(col, "blue")),
@@ -127,8 +127,8 @@ def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
         )
         fig.add_trace(
             go.Scattergl(
-                x=df_plot.loc[out, "TIMESTAMP"],
-                y=df_plot.loc[out, col],
+                x=df_plot.loc[flag, "TIMESTAMP"],
+                y=df_plot.loc[flag, col],
                 mode="markers",
                 name=f"{col} outlier",
                 marker=dict(size=7, color="red", symbol="x"),
