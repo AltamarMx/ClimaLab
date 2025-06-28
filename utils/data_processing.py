@@ -1,7 +1,16 @@
 import pandas as pd
 import numpy as np
-from .validations import  detect_radiation
-from .config import variables, latitude, longitude, gmt, name,  min_year, variables_types
+from .validations import detect_radiation
+from .config import (
+    variables,
+    latitude,
+    longitude,
+    gmt,
+    name,
+    min_year,
+    variables_types,
+    solar_constant,
+)
 from typing import Dict
 
 
@@ -10,7 +19,6 @@ names
 
 ALLOWED_VARS = list(variables.values())
 MIN_YEAR = 2010
-SOLAR_CONSTANT = 1361  # W/m², constante solar
 
 def load_csv(filepath: str) -> pd.DataFrame:
     """
@@ -195,6 +203,38 @@ def radiacion(df: pd.DataFrame, rad_columns=None) -> pd.DataFrame:
     resultado['altura_solar'] = resultado['altura_solar'].round(2)
 
     return resultado
+
+
+def clean_outliers(df: pd.DataFrame) -> pd.DataFrame:
+    """Clean irradiance data using solar geometry and flag extreme values.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame indexed by timestamp and containing irradiance columns.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The input DataFrame with extra columns ``solar_altitude`` and
+        ``outlier``. Irradiance values during nighttime are set to ``NaN``.
+    """
+
+    # 1. compute solar altitude for each timestamp
+    df = detect_radiation(df)
+
+    # 2. set irradiance to NaN when the sun is below the horizon
+    irr_cols = [c for c in ["dni", "ghi", "dhi"] if c in df.columns]
+    if irr_cols:
+        night = df["solar_altitude"] < 0
+        df.loc[night, irr_cols] = np.nan
+
+        # 3. mark outliers beyond the solar constant
+        df["outlier"] = df[irr_cols].gt(solar_constant).any(axis=1)
+    else:
+        df["outlier"] = False
+
+    return df
 
 
 # def _df_nans(df: pd.DataFrame, filepath: str) -> pd.DataFrame:
