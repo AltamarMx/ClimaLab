@@ -10,6 +10,7 @@ dependencies = [
     "fastparquet>=2024.11.0",
     "ipykernel>=6.29.5",
     "matplotlib>=3.10.3",
+    "missingno>=0.5.2",
     "pandas>=2.3.0",
     "plotly>=6.2.0",
     "plotly-resampler>=0.11.0rc1",

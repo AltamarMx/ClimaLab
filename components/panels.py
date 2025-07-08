@@ -62,7 +62,7 @@ def panel_upload_file():
             ),
             ui.card(
                 ui.card_header("EDA"),
-                output_widget("plot_plotly"),
+                ui.output_plot("missingno_plot", width="80%", height='70%'),
                 full_screen=True,
             ),
             col_widths=[3, 2, 7],
@@ -96,10 +96,8 @@ def panel_load_database():
             ui.card_body(
                 ui.layout_column_wrap(
                     ui.div(
-                        ui.p("Selecciona una acción para proceder"),
                         ui.output_ui("load_status"),
                         ui.output_ui("delete_status"),
-                        # ui.output_ui("export_database"),
                         class_="flex-grow-1"
                     ),
                     ui.div(
@@ -115,6 +113,27 @@ def panel_load_database():
                             icon=fa.icon_svg("trash"),
                             class_="btn btn-outline-danger w-100"
                         ),
+                        class_="d-flex flex-column align-items-end",
+                        style="min-width: 200px;"
+                    ),
+                    class_="d-flex gap-3 align-items-start"
+                )
+            )
+        )
+    )
+
+
+def panel_admin_database():
+    return ui.nav_panel(
+        "Admin database",
+        ui.card(
+            ui.card_header("Upload & Export"),
+            ui.card_body(
+                ui.layout_column_wrap(
+                    ui.div(
+                        class_="flex-grow-1"
+                    ),
+                    ui.div(
                         ui.download_button(
                             "export_database",   
                             "Export as Parquet",

@@ -2,6 +2,7 @@ import os
 import duckdb
 import io
 from numpy import nan
+import missingno as msno
 
 
 
@@ -10,9 +11,9 @@ from shinywidgets import render_plotly
 import faicons as fa
 
 from utils.data_processing import load_csv, run_tests, export_data, clean_outliers
-from utils.plots import plot_all_variables, plot_cleaned_radiation
+from utils.plots import plot_all_variables, plot_cleaned_radiation, plot_missingno
 from utils.config import name, drop_outliers, db_name
-from components.panels import panel_upload_file, panel_clean_outliers, panel_load_database
+from components.panels import panel_upload_file, panel_clean_outliers, panel_load_database, panel_admin_database
 from components.helper_text import info_modal
  
   
@@ -23,6 +24,7 @@ app_ui = ui.page_fluid(
         panel_upload_file(),
         panel_clean_outliers(),
         panel_load_database(),
+        panel_admin_database(),
         ui.nav_control(
             ui.input_action_button(
                 id="info_icon",
@@ -84,7 +86,8 @@ def server(input: Inputs, output: Outputs, session: Session):
             
             p.set(4, message="4/4 Plotting all data")
             # rv_types.set(plot_all_variables(df))
-            rv_plotly.set(plot_all_variables(df))
+            # rv_plotly.set(plot_all_variables(df))
+            rv_plotly.set(plot_missingno(df))
 
             # generate cleaned DataFrame 
             df_clean = clean_outliers(df.copy())
@@ -95,7 +98,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
             # df_clean = df.copy()
             rv_clean.set(df_outliers.reset_index())
-            rv_rad_plot.set(plot_cleaned_radiation(df_clean))
+            # rv_rad_plot.set(plot_cleaned_radiation(df_clean))
 
             if drop_outliers:
                 df_clean.loc[df_clean['dni_outlier'],  'dni'] = nan
@@ -148,7 +151,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             for i in range(0, len(df_load), chunk):
                 c = df_load.iloc[i : i + chunk]
                 con.register('tmp', c)
-                con.execute("INSERT INTO lecturas SELECT * FROM tmp;")
+                con.execute("INSERT INTO lecturas SELECT * FROM tmp ON CONFLICT DO NOTHING;")
                 p.set(i + chunk, message=f"Cargando filas {i+1}-{min(i+chunk, len(df_load))}…")
             con.execute("COMMIT;")
             con.close()
@@ -194,9 +197,16 @@ def server(input: Inputs, output: Outputs, session: Session):
             return ui.tags.div("No se encontró la base de datos.", class_="text-warning")
 
     # render outputs
-    @render_plotly
-    def plot_plotly():
-        return rv_plotly.get()
+    # @render_plotly
+    # def plot_plotly():
+    
+    @output
+    @render.plot
+    def missingno_plot():
+        df = rv_loaded.get()   # DataFrame cargado reactivo
+        if df is None:
+            return None
+        return plot_missingno(df)
 
     @render_plotly
     def plot_radiacion():

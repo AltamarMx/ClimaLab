@@ -2,7 +2,9 @@ import pandas as pd
 import plotly.graph_objects as go
 from .data_processing import load_csv, radiacion
 from .config import variables
-
+import missingno as msno
+import matplotlib
+matplotlib.use("Agg")
 
 
 def plot_all_variables(df: pd.DataFrame) -> go.Figure:
@@ -43,13 +45,19 @@ def plot_all_variables(df: pd.DataFrame) -> go.Figure:
             )
         )
 
-    # 5. Configure layout: unified hover, axis titles, and legend
+    # # 5. Configure layout: unified hover, axis titles, and legend
     fig.update_layout(
         hovermode="x unified",
         showlegend=True,
         xaxis_title="timestamp",
         yaxis_title="Values",
     )
+    
+
+# 3) Si usas Plotly Express, añade también:
+    # fig.update_traces(hoverinfo='skip', hovertemplate=None)
+
+
 
     # 6. Configure x-axis: grid, tick format, and automatic ticks
     fig.update_xaxes(
@@ -62,6 +70,18 @@ def plot_all_variables(df: pd.DataFrame) -> go.Figure:
     fig.update_yaxes(showgrid=True)
 
     # 8. Return the completed figure
+    return fig
+
+
+
+
+def plot_missingno(df: pd.DataFrame):
+    """
+    """
+    
+    fig = msno.matrix(df)
+
+
     return fig
 
 
