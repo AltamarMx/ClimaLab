@@ -62,7 +62,7 @@ def panel_upload_file():
             ),
             ui.card(
                 ui.card_header("EDA"),
-                output_widget("plot_plotly"),
+                ui.output_ui("plot_plotly"),
                 full_screen=True,
             ),
             col_widths=[3, 2, 7],
