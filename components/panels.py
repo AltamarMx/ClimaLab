@@ -75,11 +75,11 @@ def panel_clean_outliers():
         "Step 2",
         ui.layout_columns(
             ui.card(
-                ui.card_header("Inconsistencias de radiación"),
+                ui.card_header("Irradiance outliers"),
                 ui.output_data_frame("df_radiacion"),
             ),
             ui.card(
-                ui.card_header("Gráfico de radiación"),
+                ui.card_header("Irradiance outliers visualization"),
                 output_widget("plot_radiacion"),
                 full_screen=True,
             ),
@@ -88,31 +88,38 @@ def panel_clean_outliers():
     )
 
 
-def panel_cargar_datos():
+def panel_load_database():
     return ui.nav_panel(
         "Step 3",
         ui.card(
-            ui.card_header("Datos preparados"),
+            ui.card_header("Upload & Export"),
             ui.card_body(
                 ui.layout_column_wrap(
                     ui.div(
                         ui.p("Selecciona una acción para proceder"),
                         ui.output_ui("load_status"),
                         ui.output_ui("delete_status"),
+                        # ui.output_ui("export_database"),
                         class_="flex-grow-1"
                     ),
                     ui.div(
                         ui.input_action_button(
                             "btn_load",
-                            "Cargar en base de datos",
-                            icon=fa.icon_svg("file-export"),
+                            "Import in database",
+                            icon=fa.icon_svg("file-import"),
                             class_="btn btn-outline-success w-100 mb-2"
                         ),
                         ui.input_action_button(
                             "btn_delete",
-                            "Eliminar base de datos",
+                            "Delete database",
                             icon=fa.icon_svg("trash"),
                             class_="btn btn-outline-danger w-100"
+                        ),
+                        ui.download_button(
+                            "export_database",   
+                            "Export as Parquet",
+                            icon=fa.icon_svg("file-export"),
+                            class_="btn btn-outline-success w-100 mb-2",
                         ),
                         class_="d-flex flex-column align-items-end",
                         style="min-width: 200px;"
