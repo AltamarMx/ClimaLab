@@ -1,5 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
+from plotly_resampler import FigureResampler
 from .data_processing import load_csv, radiacion
 from .config import variables
 
@@ -8,6 +9,7 @@ from .config import variables
 def plot_all_variables(df: pd.DataFrame) -> go.Figure:
     """
     Create a Plotly scatter plot for each numeric variable in the DataFrame.
+    Uses ``plotly-resampler`` to dynamically downsample large datasets.
 
     Parameters
     ----------
@@ -23,24 +25,24 @@ def plot_all_variables(df: pd.DataFrame) -> go.Figure:
     # 1. Reset index to turn 'TIMESTAMP' into a column of type datetime
     df = df.reset_index()
 
-    # 2. Format 'TIMESTAMP' as text strings for plotting
-    df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%d %H:%M")
+    # 2. Keep raw timestamps for high-frequency data
+    timestamps = df["timestamp"]
 
     # 3. Select the list of variables to plot, excluding the formatted timestamp
     columns = list(variables.values())
     columns.remove('timestamp')
 
     # 4. Build the Plotly figure and add a Scattergl trace for each variable
-    fig = go.Figure()
+    fig = FigureResampler(go.Figure())
     for var in columns:
         fig.add_trace(
             go.Scattergl(
-                x=df.timestamp,          # x-axis: formatted timestamp strings
-                y=df[var],               # y-axis: variable values
-                mode="markers",         # display markers only
-                name=var,                # legend label for this trace
-                marker=dict(size=5),     # marker size
-            )
+                mode="markers",
+                name=var,
+                marker=dict(size=5),
+            ),
+            hf_x=timestamps,
+            hf_y=df[var],
         )
 
     # 5. Configure layout: unified hover, axis titles, and legend
