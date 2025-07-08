@@ -1,5 +1,9 @@
 import os
 import duckdb
+import io
+from numpy import nan
+
+
 
 from shiny import App, Inputs, Outputs, Session, render, ui, req, reactive
 from shinywidgets import render_plotly
@@ -7,8 +11,8 @@ import faicons as fa
 
 from utils.data_processing import load_csv, run_tests, export_data, clean_outliers
 from utils.plots import plot_all_variables, plot_cleaned_radiation
-from utils.config import name
-from components.panels import panel_upload_file, panel_clean_outliers, panel_cargar_datos
+from utils.config import name, drop_outliers, db_name
+from components.panels import panel_upload_file, panel_clean_outliers, panel_load_database
 from components.helper_text import info_modal
  
   
@@ -18,7 +22,7 @@ app_ui = ui.page_fluid(
         ui.nav_spacer(),
         panel_upload_file(),
         panel_clean_outliers(),
-        panel_cargar_datos(),
+        panel_load_database(),
         ui.nav_control(
             ui.input_action_button(
                 id="info_icon",
@@ -45,6 +49,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     rv_types   = reactive.Value(None)
     rv_plotly = reactive.Value(None)
     rv_clean = reactive.Value(None)
+    rv_outliers = reactive.Value(None)
     rv_rad_plot = reactive.Value(None)
 
     @reactive.Effect
@@ -78,13 +83,33 @@ def server(input: Inputs, output: Outputs, session: Session):
             )
             
             p.set(4, message="4/4 Plotting all data")
+            # rv_types.set(plot_all_variables(df))
             rv_plotly.set(plot_all_variables(df))
 
-            # generate cleaned DataFrame and outlier plot
+            # generate cleaned DataFrame 
             df_clean = clean_outliers(df.copy())
+
+            # get df with ONLY outliers
+            cols = ['dni_outlier', 'dhi_outlier', 'ghi_outlier']
+            df_outliers = df_clean[df_clean[cols].any(axis=1)]
+
             # df_clean = df.copy()
-            rv_clean.set(df_clean)
+            rv_clean.set(df_outliers.reset_index())
             rv_rad_plot.set(plot_cleaned_radiation(df_clean))
+
+            if drop_outliers:
+                df_clean.loc[df_clean['dni_outlier'],  'dni'] = nan
+                df_clean.loc[df_clean['dhi_outlier'],  'dhi'] = nan
+                df_clean.loc[df_clean['ghi_outlier'],  'ghi'] = nan
+
+                del df_clean['dni_outlier']
+                del df_clean['dhi_outlier']
+                del df_clean['ghi_outlier']
+                rv_outliers.set(df_clean)
+            else:
+                rv_outliers.set(df_clean)
+                
+
 
 
     # load into DuckDB
@@ -92,14 +117,14 @@ def server(input: Inputs, output: Outputs, session: Session):
     @render.ui
     @reactive.event(input.btn_load)
     async def load_status():
-        df = rv_clean.get().copy()
+        df = rv_outliers.get().copy()
         
         df = df.reset_index()
-        print(df)
-        df['TIMESTAMP'] = df['TIMESTAMP'].dt.strftime('%Y-%m-%d %H:%M')
+        print(df.info())
+        df['timestamp'] = df['timestamp'].dt.strftime('%Y-%m-%d %H:%M')
 
         long_df = df.melt(
-            id_vars=['TIMESTAMP'],
+            id_vars=['timestamp'],
             var_name='variable',
             value_name='value'
         )
@@ -109,7 +134,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
         with ui.Progress(min=1, max=len(df_load)) as p:
             p.set(message="Iniciando carga…")
-            con = duckdb.connect('esolmet.db')
+            con = duckdb.connect(db_name)
             con.execute("""
                 CREATE TABLE IF NOT EXISTS lecturas (
                     date TIMESTAMP,
@@ -129,12 +154,31 @@ def server(input: Inputs, output: Outputs, session: Session):
             con.close()
         return ui.tags.div("Carga completada", class_="text-success")
 
-    # delete DB file
+    @output  # id="export_database" implícito
+    @render.download(filename="ClimaLab.parquet",
+                    media_type="application/x-parquet")  # opcional pero útil
+    def export_database():
+        # 1) Read and pivot df
+        con = duckdb.connect(db_name)
+        df = (
+            con.execute("SELECT * FROM lecturas ORDER BY date")
+            .fetchdf()
+            .pivot(index="date", columns="variable", values="value")
+        )
+        con.close()
+
+        # 2) Write parquet to buffer in memory
+        with io.BytesIO() as buf:
+            df.to_parquet(buf, index=True, engine="pyarrow")
+            buf.seek(0)
+            yield buf.getvalue()       # <-- clave: yield bytes
+
+            
     @output
     @render.ui
     @reactive.event(input.btn_delete)
     async def delete_status():
-        db_path = "esolmet.db"
+        db_path = db_name
         if os.path.exists(db_path):
             try:
                 os.remove(db_path)
@@ -193,4 +237,4 @@ def server(input: Inputs, output: Outputs, session: Session):
         )
 
 # instantiate app
-app = App(app_ui, server)
+app = App(app_ui, server,debug=False)

@@ -24,7 +24,7 @@ def plot_all_variables(df: pd.DataFrame) -> go.Figure:
     df = df.reset_index()
 
     # 2. Format 'TIMESTAMP' as text strings for plotting
-    df["timestamp"] = df["TIMESTAMP"].dt.strftime("%Y-%m-%d %H:%M")
+    df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%d %H:%M")
 
     # 3. Select the list of variables to plot, excluding the formatted timestamp
     columns = list(variables.values())
@@ -108,7 +108,8 @@ def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
     """Plot irradiance data highlighting detected outliers per variable."""
 
     df_plot = df.reset_index()
-    df_plot["TIMESTAMP"] = df_plot["TIMESTAMP"].dt.strftime("%Y-%m-%d %H:%M")
+    # df_plot = df.copy()
+    df_plot["timestamp"] = df_plot["timestamp"].dt.strftime("%Y-%m-%d %H:%M")
 
     fig = go.Figure()
     irr_cols = [c for c in ["dni", "ghi", "dhi"] if c in df_plot.columns]
@@ -118,7 +119,7 @@ def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
         flag = df_plot.get(f"{col}_outlier", pd.Series(False, index=df_plot.index))
         fig.add_trace(
             go.Scattergl(
-                x=df_plot.loc[~flag, "TIMESTAMP"],
+                x=df_plot.loc[~flag, "timestamp"],
                 y=df_plot.loc[~flag, col],
                 mode="markers",
                 name=col,
@@ -127,7 +128,7 @@ def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
         )
         fig.add_trace(
             go.Scattergl(
-                x=df_plot.loc[flag, "TIMESTAMP"],
+                x=df_plot.loc[flag, "timestamp"],
                 y=df_plot.loc[flag, col],
                 mode="markers",
                 name=f"{col} outlier",
@@ -138,7 +139,7 @@ def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         hovermode="x unified",
         showlegend=True,
-        xaxis_title="TIMESTAMP",
+        xaxis_title="timestamp",
         yaxis_title="Irradiance [W/m²]",
     )
     fig.update_xaxes(showgrid=True, tickformat="%Y-%m-%d %H:%M", tickmode="auto")

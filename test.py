@@ -1,53 +1,49 @@
 # %%
-
-import plotly.graph_objects as go
-from utils.data_processing import load_csv
 import pandas as pd
-from utils.config import variables
+from utils.data_processing import load_csv
 # %%
-
-
-# 3. determinar qué variables graficar (descartar la columna TIMESTAMP)
-
-
+f = '../../Desktop/DATOS_ESOLMET_JESUS_QUIÑONES/2025/0129/Esolmet_CR6_IP_Table3_1min.dat'
+df = load_csv(f)
 # %%
-f = 'data/Esolmet_CR6_IP_TableWEB_10min.csv'
-df  = load_csv(f)
+df.info()
+# %%
+columns = df.columns 
+# 1. Reset index to turn 'TIMESTAMP' into a column of type datetime
+df = df.reset_index()
 
+# 2. Format 'TIMESTAMP' as text strings for plotting
+df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%d %H:%M")
 
-df = df.reset_index()  # ahora 'TIMESTAMP' es columna de tipo datetime
-df["timestamp"] = df["TIMESTAMP"].dt.strftime("%Y-%m-%d %H:%M")
+# 3. Select the list of variables to plot, excluding the formatted timestamp
 
-columns =  list(variables.values())
-columns.remove('timestamp')
-columns
-
-
-# 4. construir figura
+# 4. Build the Plotly figure and add a Scattergl trace for each variable
 fig = go.Figure()
 for var in columns:
     fig.add_trace(
         go.Scattergl(
-            x = df.timestamp,
-            y = df[var],
-            mode = "markers",
-            name = var,
-            marker = dict(size=5),
+            x=df.timestamp,          # x-axis: formatted timestamp strings
+            y=df[var],               # y-axis: variable values
+            mode="markers",         # display markers only
+            name=var,                # legend label for this trace
+            marker=dict(size=5),     # marker size
         )
     )
 
-# 5. configurar layout
+# 5. Configure layout: unified hover, axis titles, and legend
 fig.update_layout(
-    hovermode = "x unified",
-    showlegend = True,
-    xaxis_title = "timestamp",
-    yaxis_title = "Values",
+    hovermode="x unified",
+    showlegend=True,
+    xaxis_title="timestamp",
+    yaxis_title="Values",
 )
-fig.update_xaxes(
-    showgrid = True,
-    tickformat = "%Y-%m-%d %H:%M",
-    tickmode = "auto",
-)
-fig.update_yaxes(showgrid = True)
 
+# 6. Configure x-axis: grid, tick format, and automatic ticks
+fig.update_xaxes(
+    showgrid=True,
+    tickformat="%Y-%m-%d %H:%M",
+    tickmode="auto",
+)
+
+# 7. Configure y-axis to show grid lines
+fig.update_yaxes(showgrid=True)
 # %%

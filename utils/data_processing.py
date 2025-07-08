@@ -43,30 +43,32 @@ def load_csv(filepath: str) -> pd.DataFrame:
     """
 
     # 1️  Read file — skip device-metadata rows, keep only desired columns,
-    #     parse first column as DatetimeIndex (local time).
     df = pd.read_csv(
         filepath,
         skiprows=[0, 2, 3],    # rows with logger headers / units
         usecols=names,         # raw column names or positions
-        parse_dates=True,
-        index_col=0,
-        dayfirst=False,
+        low_memory=False
     )
-
     # 2️  Rename raw logger headers to canonical names (e.g. 'WS[m/s]' → 'ws').
     df.rename(columns=variables, inplace=True)
 
-    # 3️  Drop records earlier than the minimum year allowed.
+    # 3 Convert col timestamp to datetime and set to index 
+    df.timestamp = pd.to_datetime(
+        df.timestamp, 
+        format='%Y-%m-%d %H:%M:%S')
+    df.set_index('timestamp',inplace=True)
+
+    # 4  Drop records earlier than the minimum year allowed.
     df = df[df.index.year >= min_year]
 
-    # 4️  Enforce expected dtypes (all numeric variables to float64, etc.).
+    # 5  Enforce expected dtypes (all numeric variables to float64, etc.).
     df = df.astype(variables_types, errors="raise")
 
-    # 5️  Remove duplicate timestamps and duplicate full rows.
+    # 6  Remove duplicate timestamps and duplicate full rows.
     df = df[~df.index.duplicated(keep="first")]
     df = df.drop_duplicates()
 
-    # 6️  Ensure chronological order.
+    # 7  Ensure chronological order.
     df.sort_index(inplace=True)
 
     return df

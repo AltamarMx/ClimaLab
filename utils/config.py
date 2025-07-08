@@ -36,3 +36,8 @@ min_year = 2001
 # Solar constant in W/m² used for irradiance quality checks
 solar_constant = 1361
 
+# Drop outliers before saving in database 
+drop_outliers = True
+
+# Database name
+db_name = 'ClimaLab.db'
