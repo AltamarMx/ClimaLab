@@ -194,9 +194,12 @@ def server(input: Inputs, output: Outputs, session: Session):
             return ui.tags.div("No se encontró la base de datos.", class_="text-warning")
 
     # render outputs
-    @render_plotly
+    @render.ui
     def plot_plotly():
-        return rv_plotly.get()
+        fig = rv_plotly.get()
+        if fig is None:
+            return ui.div()
+        return ui.HTML(fig.to_html(include_plotlyjs="cdn", full_html=False))
 
     @render_plotly
     def plot_radiacion():
