@@ -1,4 +1,4 @@
-from shiny import ui, reactive, render
+from shiny import ui
 from shinywidgets import output_widget
 
 def panel_explorador():
@@ -14,12 +14,11 @@ def panel_explorador():
             language="es",
             separator="a",
         ),
-        ui.output_ui("plot_matplotlib"),
+        output_widget("plot_resampler"),
     )
 
 
 def panel_estadistica():
     return ui.nav_panel(
         "Estadística",
-        "Aquí irá tu contenido estadístico"
-    )
+        "Aquí irá tu contenido estadístico"    )
