@@ -116,24 +116,41 @@ def graph_all_plotly_resampler(db_path=db_name, max_samples=1000):
     df = df.reset_index()
     df["timestamp"] = df["date"].dt.strftime("%Y-%m-%d %H:%M")
 
-    # 3) Build the Plotly figure with resampler support
-    fig = FigureWidgetResampler(go.Figure(), default_n_shown_samples=max_samples)
+    # ── 1. Crea la figura y añade la serie ──────────────────────────────────────────
+    fig = go.Figure()
 
-    for var in [v for v in variables.values() if v != "timestamp"]:
-        fig.add_trace(
-            go.Scattergl(name=var, showlegend=True),
-            hf_x=df["timestamp"],
-            hf_y=df[var],
+    fig.add_trace(
+        go.Scattergl(
+            x=df['timestamp'],
+            y=df['tdb'],
+            mode='lines',        # «markers» si prefieres puntos
+            name='Temperatura BD'  # Etiqueta de la serie
         )
-
-    fig.update_layout(
-        hovermode="x unified",
-        showlegend=True,
-        xaxis_title="timestamp",
-        yaxis_title="Values",
     )
-    fig.update_xaxes(showgrid=True, tickformat="%Y-%m-%d %H:%M", tickmode="auto")
-    fig.update_yaxes(showgrid=True)
+
+    # ── 2. Configura el rango, selector y slider ────────────────────────────────────
+    fig.update_layout(
+        xaxis=dict(
+            # Botones rápidos de rango (opcional)
+            rangeselector=dict(
+                buttons=[
+                    dict(count=1, label="1 m",   step="month", stepmode="backward"),
+                    dict(count=6, label="6 m",   step="month", stepmode="backward"),
+                    dict(count=1, label="YTD",   step="year",  stepmode="todate"),
+                    dict(count=1, label="1 a",   step="year",  stepmode="backward"),
+                    dict(step="all", label="Todo")
+                ]
+            ),
+            # Slider inferior
+            rangeslider=dict(visible=True),
+            type="date"   # ← IMPORTANTE: obliga a tratar el eje como fechas
+        ),
+        yaxis_title="tbd",
+        xaxis_title="Fecha",
+        hovermode="x unified",  # Tooltip único por columna de tiempo
+        template="plotly_white", # Estilo limpio; quítalo si usas tu propio template
+        margin=dict(t=40, r=10, b=40, l=60)
+    )
 
     return fig
 
