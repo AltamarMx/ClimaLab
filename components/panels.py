@@ -1,43 +1,29 @@
 from shiny import ui
-from shinywidgets import output_widget
-import faicons as fa  
+import faicons as fa
 
 
 def panel_estadistica():
-    return ui.nav_panel(
-        "Estadística",
-        "Aquí irá tu contenido estadístico"
-    )
+    return ui.nav_panel("Estadística", "Aquí irá tu contenido estadístico")
+
 
 def panel_trayectoriasolar():
-    return ui.nav_panel(
-        "SunPath",
-        "Inserta aquí la figura de sunpath"
-    )
+    return ui.nav_panel("SunPath", "Inserta aquí la figura de sunpath")
+
 
 def panel_fotovoltaica():
-    return ui.nav_panel(
-        "FotoVoltaica",
-        "Inserta aquí la Produccion solar"
-    )
+    return ui.nav_panel("FotoVoltaica", "Inserta aquí la Produccion solar")
+
 
 def panel_confort():
-    return ui.nav_panel(
-        "Confort térmico",
-        "Inserta aquí todo  sobre confort"
-    )
+    return ui.nav_panel("Confort térmico", "Inserta aquí todo  sobre confort")
 
 
 def panel_eolica():
-    return ui.nav_panel(
-        "Eolica",
-        "Inserta aquí la Produccion eólica"
-    )
+    return ui.nav_panel("Eolica", "Inserta aquí la Produccion eólica")
+
+
 def panel_documentacion():
-    return ui.nav_panel(
-        "Documentación",
-        "Inserta aquí la documentación"
-    )
+    return ui.nav_panel("Documentación", "Inserta aquí la documentación")
 
 
 def panel_upload_file():
@@ -51,7 +37,7 @@ def panel_upload_file():
                     "Select file",
                     button_label="Browse",
                     placeholder="FILE",
-                    accept=['.csv','.dat']
+                    accept=[".csv", ".dat"],
                 ),
                 ui.output_ui("upload_status"),
                 ui.output_table("table_tests"),
@@ -62,15 +48,16 @@ def panel_upload_file():
             ),
             ui.card(
                 ui.card_header("EDA"),
-                ui.output_plot("missingno_plot_imported", width="80%", height='70%'),
+                ui.output_plot("missingno_plot_imported", width="80%", height="70%"),
                 full_screen=True,
             ),
             col_widths=[3, 2, 7],
         ),
         ui.card(
             ui.card_header("All data"),
+            ui.output_ui("column_selector"),
             ui.output_plot("plot_all_matplotlib"),
-            full_screen=True
+            full_screen=True,
         ),
     )
 
@@ -103,53 +90,50 @@ def panel_load_database():
                     ui.div(
                         ui.output_ui("load_status"),
                         ui.output_ui("delete_status"),
-                        class_="flex-grow-1"
+                        class_="flex-grow-1",
                     ),
                     ui.div(
                         ui.input_action_button(
                             "btn_load",
                             "Import in database",
                             icon=fa.icon_svg("file-import"),
-                            class_="btn btn-outline-success w-100 mb-2"
+                            class_="btn btn-outline-success w-100 mb-2",
                         ),
                         ui.input_action_button(
                             "btn_delete",
                             "Delete database",
                             icon=fa.icon_svg("trash"),
-                            class_="btn btn-outline-danger w-100"
+                            class_="btn btn-outline-danger w-100",
                         ),
                         class_="d-flex flex-column align-items-end",
-                        style="min-width: 200px;"
+                        style="min-width: 200px;",
                     ),
-                    class_="d-flex gap-3 align-items-start"
+                    class_="d-flex gap-3 align-items-start",
                 )
-            )
-        )
+            ),
+        ),
     )
 
 
 def panel_admin_database():
     return ui.nav_panel(
-        "Export database", 
+        "Export database",
         ui.card(
             ui.card_header("Upload & Export"),
             ui.card_body(
                 ui.layout_column_wrap(
-                    ui.div(
-                        class_="flex-grow-1"
-                    ),
+                    ui.div(class_="flex-grow-1"),
                     ui.div(
                         ui.download_button(
-                            "export_database",   
+                            "export_database",
                             "Export as Parquet",
                             icon=fa.icon_svg("file-export"),
                             class_="btn btn-outline-success w-100 mb-2",
                         ),
                         class_="d-flex flex-column align-items-end",
-                        style="min-width: 200px;"
+                        style="min-width: 200px;",
                     ),
-                    class_="d-flex gap-3 align-items-start"
-                )
-            )
-        )
+                    class_="d-flex gap-3 align-items-start",
+                )            ),
+        ),
     )
