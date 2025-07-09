@@ -1,9 +1,11 @@
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 from .data_processing import load_csv, radiacion
 from .config import variables
 import missingno as msno
 import matplotlib
+import matplotlib.pyplot as plt 
 matplotlib.use("Agg")
 
 
@@ -78,11 +80,32 @@ def plot_all_variables(df: pd.DataFrame) -> go.Figure:
 def plot_missingno(df: pd.DataFrame):
     """
     """
-    
-    fig = msno.matrix(df)
+    fig, ax = plt.subplots(layout="constrained")
+    fig = msno.matrix(df, ax=ax, fontsize=7,sparkline=False)
+
+    # fig = msno.matrix(df,fontsize=7)
 
 
     return fig
+
+def plot_all(df: pd.DataFrame):
+    """
+    """
+    columns = df.columns
+
+    print(columns)
+    
+    fig, ax = plt.subplots()
+
+
+    # Ahora axes[i] siempre funciona
+    for column in columns:
+        print(column)
+        ax.plot(df[column], label=column)
+        ax.legend()
+
+    return fig
+
 
 
 def graficado_radiacion(path_archivo: str, rad_columns: list[str] = None) -> go.Figure:

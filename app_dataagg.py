@@ -11,7 +11,7 @@ from shinywidgets import render_plotly
 import faicons as fa
 
 from utils.data_processing import load_csv, run_tests, export_data, clean_outliers
-from utils.plots import plot_all_variables, plot_cleaned_radiation, plot_missingno
+from utils.plots import plot_all_variables, plot_cleaned_radiation, plot_missingno, plot_all
 from utils.config import name, drop_outliers, db_name
 from components.panels import panel_upload_file, panel_clean_outliers, panel_load_database, panel_admin_database
 from components.helper_text import info_modal
@@ -49,10 +49,11 @@ def server(input: Inputs, output: Outputs, session: Session):
     rv_loaded = reactive.Value(None)
     rv_tests  = reactive.Value(None)
     rv_types   = reactive.Value(None)
-    rv_plotly = reactive.Value(None)
+    rv_missingno = reactive.Value(None)
     rv_clean = reactive.Value(None)
     rv_outliers = reactive.Value(None)
     rv_rad_plot = reactive.Value(None)
+    rv_plot_all = reactive.Value(None)
 
     @reactive.Effect
     @reactive.event(input.info_icon)
@@ -65,29 +66,30 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.event(input.file)
     async def upload_status():
         file = req(input.file())[0]["datapath"]
-        total_steps = 4
+        total_steps = 5
 
         with ui.Progress(min=0, max=total_steps) as p:
-            p.set(1, message="1/4 Loading file")
+            p.set(1, message="1/5 Loading file")
             df = load_csv(file)
             rv_loaded.set(df)
 
-            p.set(2, message="2/4 Reviewing data structure")
+            p.set(2, message="2/5 Reviewing data structure")
             tests = run_tests(df)
             rv_tests.set(tests)
 
 
-            p.set(3, message="3/4 Reporting columns type")
+            p.set(3, message="3/5 Reporting columns type")
             rv_types.set(
                 df.dtypes
                     .rename_axis("Column")
                     .reset_index(name="Type")
             )
             
-            p.set(4, message="4/4 Plotting all data")
+            p.set(4, message="4/5 EDA")
             # rv_types.set(plot_all_variables(df))
             # rv_plotly.set(plot_all_variables(df))
-            rv_plotly.set(plot_missingno(df))
+            
+            rv_missingno.set(plot_missingno(df))
 
             # generate cleaned DataFrame 
             df_clean = clean_outliers(df.copy())
@@ -100,6 +102,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             rv_clean.set(df_outliers.reset_index())
             # rv_rad_plot.set(plot_cleaned_radiation(df_clean))
 
+
             if drop_outliers:
                 df_clean.loc[df_clean['dni_outlier'],  'dni'] = nan
                 df_clean.loc[df_clean['dhi_outlier'],  'dhi'] = nan
@@ -111,6 +114,11 @@ def server(input: Inputs, output: Outputs, session: Session):
                 rv_outliers.set(df_clean)
             else:
                 rv_outliers.set(df_clean)
+            rv_rad_plot.set(plot_missingno(df_clean))
+            
+            p.set(5, message="5/5 Plotting all data")
+            rv_plot_all.set(plot_all(df_clean))
+            
                 
 
 
@@ -201,16 +209,30 @@ def server(input: Inputs, output: Outputs, session: Session):
     # def plot_plotly():
     
     @output
-    @render.plot
-    def missingno_plot():
+    @render.plot(bbox_inches=None)
+    def missingno_plot_imported():
         df = rv_loaded.get()   # DataFrame cargado reactivo
         if df is None:
             return None
         return plot_missingno(df)
 
-    @render_plotly
-    def plot_radiacion():
-        return rv_rad_plot.get()
+    @output
+    @render.plot(bbox_inches=None)
+    def missingno_plot_outliers():
+        df = rv_outliers.get()   # DataFrame cargado reactivo
+        if df is None:
+            return None
+        return plot_missingno(df)
+    
+    
+    @output
+    @render.plot(bbox_inches=None)
+    def plot_all_matplotlib():
+        df = rv_plot_all.get()   # DataFrame cargado reactivo
+        if df is None:
+            return None
+        return plot_all(df)
+
 
 
     @render.data_frame
@@ -218,7 +240,7 @@ def server(input: Inputs, output: Outputs, session: Session):
         return rv_types.get()
 
     @render.data_frame
-    def df_radiacion():
+    def df_irradiance():
         return rv_clean.get()
 
 

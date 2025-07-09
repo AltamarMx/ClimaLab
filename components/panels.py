@@ -62,10 +62,15 @@ def panel_upload_file():
             ),
             ui.card(
                 ui.card_header("EDA"),
-                ui.output_plot("missingno_plot", width="80%", height='70%'),
+                ui.output_plot("missingno_plot_imported", width="80%", height='70%'),
                 full_screen=True,
             ),
             col_widths=[3, 2, 7],
+        ),
+        ui.card(
+            ui.card_header("All data"),
+            ui.output_plot("plot_all_matplotlib"),
+            full_screen=True
         ),
     )
 
@@ -76,11 +81,11 @@ def panel_clean_outliers():
         ui.layout_columns(
             ui.card(
                 ui.card_header("Irradiance outliers"),
-                ui.output_data_frame("df_radiacion"),
+                ui.output_data_frame("df_irradiance"),
             ),
             ui.card(
-                ui.card_header("Irradiance outliers visualization"),
-                output_widget("plot_radiacion"),
+                ui.card_header("Data without outliers"),
+                ui.output_plot("missingno_plot_outliers"),
                 full_screen=True,
             ),
             col_widths=[5, 7],
@@ -125,7 +130,7 @@ def panel_load_database():
 
 def panel_admin_database():
     return ui.nav_panel(
-        "Admin database",
+        "Export database", 
         ui.card(
             ui.card_header("Upload & Export"),
             ui.card_body(

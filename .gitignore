@@ -2,3 +2,4 @@
 **.db           # bases de datos
 **/__pycache__
 **.parquet
+climalab.db
