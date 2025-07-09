@@ -48,7 +48,8 @@ def server(input, output, session):
     @output
     @render_plotly
     def plot_resampler():
-        return graph_all_plotly_resampler(input.fechas())
+        # return graph_all_plotly_resampler(input.fechas())
+        return graph_all_plotly_resampler()
 
 
 app = App(app_ui, server)

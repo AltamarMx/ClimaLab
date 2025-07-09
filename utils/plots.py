@@ -92,34 +92,45 @@ def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
 
     return fig
 
-def graph_all_plotly_resampler(fechas, db_path=db_name, max_samples=1000):
+
+
+
+def graph_all_plotly_resampler( db_path=db_name, max_samples=1000):
     # 1) Carga y pivoteo
-    # con = duckdb.connect(db_path)
-    # q = f"""
-    # SELECT *
-    #   FROM lecturas
-    #  WHERE date >= TIMESTAMP '{fechas[0]}'
-    #    AND date <= TIMESTAMP '{fechas[1]}'
-    #  ORDER BY date
-    # """
-    # df = con.execute(q).fetchdf()
-    # con.close()
-    # df = df.pivot(index="date", columns="variable", values="value")
-    # %%
-    x = np.arange(1_000_000)
-    noisy_sin = (3 + np.sin(x / 200) + np.random.randn(len(x)) / 10) * x / 1_000
+    con = duckdb.connect(db_path)
+    q = f"""
+    SELECT *
+      FROM lecturas
+     ORDER BY date
+    """
+    df = con.execute(q).fetchdf()
+    con.close()
+    df = df.pivot(index="date", columns="variable", values="value")
+    
+    # 1. Reset index to turn 'TIMESTAMP' into a column of type datetime
+    df = df.reset_index()
 
-    # %%
-    # OPTION 1 - FigureWidgetResampler: integrates with widget-based frameworks
+    # 2. Format 'TIMESTAMP' as text strings for plotting
+    df["timestamp"] = df["date"].dt.strftime("%Y-%m-%d %H:%M")
+
+    # 3. Select the list of variables to plot, excluding the formatted timestamp
+    columns = list(variables.values())
+    columns.remove("timestamp")
+
+    # 4. Build the Plotly figure and add a Scattergl trace for each variable
+    # fig = go.Figure()
     fig = FigureWidgetResampler(go.Figure())
-    fig.add_trace(
-        go.Scattergl(name="noisy sine", showlegend=True), hf_x=x, hf_y=noisy_sin
-    )
 
-    # fig.show_dash(mode='inline')
+    fig.add_trace(
+        go.Scattergl(name='algo'),
+        hf_x=df.timestamp,  # x-axis: formatted timestamp strings
+        hf_y=df['tdb'],  # y-axis: variable values
+    )
+    
+
+
     return fig
 
-# %%
 
 
 
