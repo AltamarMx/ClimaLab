@@ -114,13 +114,19 @@ def graph_all_plotly_resampler(db_path=db_name, max_samples=1000):
 
     # 2) Prepare timestamps for plotting
     df = df.reset_index()
-    df["timestamp"] = df["date"].dt.strftime("%Y-%m-%d %H:%M")
+    # Avoid formatting the timestamp as a string so Plotly can
+    # correctly interpret it as a date.  Using actual datetime
+    # objects ensures the range slider spans the complete data
+    # range when rendered in Shiny.
+    df["timestamp"] = df["date"]
 
     # ── 1. Crea la figura y añade la serie ──────────────────────────────────────────
     fig = go.Figure()
 
     fig.add_trace(
         go.Scattergl(
+            # Pass the datetime objects directly so Plotly treats
+            # the x‑axis values as dates
             x=df['timestamp'],
             y=df['tdb'],
             mode='lines',        # «markers» si prefieres puntos
