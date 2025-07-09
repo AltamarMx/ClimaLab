@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 
 import plotly.graph_objects as go
-from plotly_resampler import FigureResampler, FigureWidgetResampler
+from plotly_resampler import FigureWidgetResampler
 
 
 def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
@@ -110,9 +110,11 @@ def graph_all_plotly_resampler(fechas, db_path=db_name, max_samples=1000):
     noisy_sin = (3 + np.sin(x / 200) + np.random.randn(len(x)) / 10) * x / 1_000
 
     # %%
-    # OPTION 1 - FigureResampler: dynamic aggregation via a Dash web-app
-    fig = FigureResampler(go.Figure())
-    fig.add_trace(go.Scattergl(name='noisy sine', showlegend=True), hf_x=x, hf_y=noisy_sin)
+    # OPTION 1 - FigureWidgetResampler: integrates with widget-based frameworks
+    fig = FigureWidgetResampler(go.Figure())
+    fig.add_trace(
+        go.Scattergl(name="noisy sine", showlegend=True), hf_x=x, hf_y=noisy_sin
+    )
 
     # fig.show_dash(mode='inline')
     return fig
