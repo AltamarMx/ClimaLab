@@ -1,5 +1,5 @@
 from shiny import App, ui, render
-from shinywidgets import render_widget
+from shinywidgets import render_plotly
 import shinyswatch
 
 from utils.config import name
@@ -46,7 +46,7 @@ def server(input, output, session):
 
 
     @output
-    @render_widget
+    @render_plotly
     def plot_matplotlib():
         # return graph_all_matplotlib(input.fechas())
         return graph_all_plotly_resampler(input.fechas())
