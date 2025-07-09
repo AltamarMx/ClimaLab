@@ -98,7 +98,7 @@ def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
 
 
 
-def graph_all_plotly_resampler(db_path=db_name, max_samples=1000):
+def graph_all_plotly_resampler(db_path=db_name):
     """Return a Plotly figure with dynamic resampling enabled."""
 
     # 1) Load data and pivot into wide format
