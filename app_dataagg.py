@@ -117,7 +117,8 @@ def server(input: Inputs, output: Outputs, session: Session):
             rv_rad_plot.set(plot_missingno(df_clean))
             
             p.set(5, message="5/5 Plotting all data")
-            rv_plot_all.set(plot_all(df_clean))
+            rv_plot_all.set(df_clean)
+
             
                 
 
