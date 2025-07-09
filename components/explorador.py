@@ -1,4 +1,5 @@
 from shiny import ui, reactive, render
+from shinywidgets import output_widget
 
 def panel_explorador():
     return ui.nav_panel(
@@ -13,7 +14,7 @@ def panel_explorador():
             language="es",
             separator="a",
         ),
-        ui.output_plot("plot_matplotlib",fill=True),
+        output_widget("plot_matplotlib",fill=True),
     )
 
 

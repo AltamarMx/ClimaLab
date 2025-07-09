@@ -1,12 +1,166 @@
 import pandas as pd
 import plotly.graph_objects as go
-from .data_processing import load_csv, radiacion
-from .config import variables
+from windrose import WindroseAxes
+from matplotlib.gridspec import GridSpec   
+import numpy as np
+
+
+from utils.data_processing import load_csv, radiacion
+from utils.config import variables
+from utils.config import db_name
+
 import missingno as msno
 import matplotlib
-import matplotlib.pyplot as plt
+import duckdb
+
 
 matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+
+
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from plotly_resampler import FigureResampler
+
+
+def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
+
+    # 1) No es necesario usar alias; las columnas ya tienen nombres universales
+    con = duckdb.connect(db_path)
+    
+    # 2) Carga y pivoteo
+    query = f"""
+    SELECT *
+      FROM lecturas
+     WHERE date >= TIMESTAMP '{fechas[0]}'
+       AND date <= TIMESTAMP '{fechas[1]}'
+     ORDER BY date
+    """
+    df = con.execute(query).fetchdf()
+    df = df.pivot(index="date", columns="variable", values="value")
+
+    # 3) Figure + GridSpec
+    fig = plt.figure()
+    # fig.set_constrained_layout(True)
+
+    gs = GridSpec(
+        nrows=4,
+        ncols=2,
+        width_ratios=[4, 1],
+        height_ratios=[1, 1, 1, 1],
+        #    wspace=0.1, hspace=0.1,
+        figure=fig,
+    )
+
+    ax_tdb = fig.add_subplot(gs[0, 0])
+    ax_rh = fig.add_subplot(gs[1, 0], sharex=ax_tdb)
+    ax_p = fig.add_subplot(gs[2, 0], sharex=ax_tdb)
+    ax_i = fig.add_subplot(gs[3, 0], sharex=ax_tdb)
+    ax_wind = fig.add_subplot(gs[:, 1], projection="windrose")
+
+
+    # Graficar temperatura
+    ax_tdb.plot(df.index, df.tdb, label="tdb", c="k", alpha=0.8)
+    ax_tdb.set_ylabel("Temperatura [°C]")
+    ax_tdb.legend(loc="upper left")
+
+    # Graficar presión
+    ax_p.plot(df.p_atm, label="p_atm", alpha=0.8)
+    ax_p.set_ylabel("Presión [Pa]")
+    ax_p.legend(loc="upper left")
+
+    # Graficar Is
+    ax_i.plot(df.index, df.ghi, label="ghi")
+    ax_i.plot(df.index, df.dni, label="dni")
+    ax_i.plot(df.index, df.dhi, label="dhi")
+    ax_i.set_ylabel("Irradiancia [W/m2]")
+    ax_i.legend(loc="upper left")
+
+    # Graficar humedad relativa hr
+    ax_rh.plot(df.rh, label="rh")
+    ax_rh.set_ylim(0, 100)
+    ax_rh.set_ylabel("HR [%]")
+    ax_rh.legend()
+
+    # 5) Rosa de vientos
+    ax_wind.bar(df.wd, df.ws, normed=True, opening=0.8, edgecolor="white")
+    ax_wind.set_title("Rosa de Vientos")
+
+    # 6) Formato de fecha en eje X
+    fig.autofmt_xdate()
+
+    return fig
+
+def graph_all_plotly_resampler(fechas, db_path=db_name, max_samples=1000):
+    # 1) Carga y pivoteo
+    con = duckdb.connect(db_path)
+    q = f"""
+    SELECT *
+      FROM lecturas
+     WHERE date >= TIMESTAMP '{fechas[0]}'
+       AND date <= TIMESTAMP '{fechas[1]}'
+     ORDER BY date
+    """
+    df = con.execute(q).fetchdf()
+    con.close()
+    df = df.pivot(index="date", columns="variable", values="value")
+
+    # 2) Arrays contiguos
+    x = np.ascontiguousarray(df.index.to_numpy())
+    y_tdb  = np.ascontiguousarray(df["tdb"].to_numpy())
+    y_rh   = np.ascontiguousarray(df["rh"].to_numpy())
+    y_patm = np.ascontiguousarray(df["p_atm"].to_numpy())
+    y_ghi  = np.ascontiguousarray(df["ghi"].to_numpy())
+    y_dni  = np.ascontiguousarray(df["dni"].to_numpy())
+    y_dhi  = np.ascontiguousarray(df["dhi"].to_numpy())
+
+    # 3) Subplots
+    specs = [
+        [{"type": "xy"}, {"type": "polar", "rowspan": 4}],
+        [{"type": "xy"}, None],
+        [{"type": "xy"}, None],
+        [{"type": "xy"}, None],
+    ]
+    fig = make_subplots(
+        rows=4, cols=2,
+        shared_xaxes=True,
+        column_widths=[0.75, 0.25],
+        row_heights=[0.25]*4,
+        specs=specs,
+        horizontal_spacing=0.05,
+        vertical_spacing=0.02,
+    )
+
+    # 4) Remuestreo
+    fr = FigureResampler(fig, default_n_shown_samples=max_samples)
+
+    # 5) Añadir trazas
+    fr.add_trace(go.Scatter(name="tdb [°C]"), hf_x=x, hf_y=y_tdb, row=1, col=1)
+    fr.add_trace(go.Scatter(name="rh [%]"), hf_x=x, hf_y=y_rh, row=2, col=1)\
+      .update_yaxes(range=[0,100], row=2, col=1)
+    fr.add_trace(go.Scatter(name="p_atm [Pa]"), hf_x=x, hf_y=y_patm, row=3, col=1)
+    fr.add_trace(go.Scatter(name="ghi"), hf_x=x, hf_y=y_ghi, row=4, col=1)
+    fr.add_trace(go.Scatter(name="dni"), hf_x=x, hf_y=y_dni, row=4, col=1)
+    fr.add_trace(go.Scatter(name="dhi"), hf_x=x, hf_y=y_dhi, row=4, col=1)
+
+    # 6) Rosa de vientos
+    wind = df.dropna(subset=["wd","ws"])
+    wind_r     = np.ascontiguousarray(wind["ws"].to_numpy())
+    wind_theta = np.ascontiguousarray(wind["wd"].to_numpy())
+    fr.add_trace(
+        go.Barpolar(r=wind_r, theta=wind_theta, name="Vientos", opacity=0.8),
+        row=1, col=2
+    )
+
+    # 7) Ajustes
+    fr.update_layout(title_text="Lecturas meteorológicas", showlegend=True, height=800)
+    fr.update_polars(angularaxis=dict(direction="clockwise", rotation=90))
+    fr.update_xaxes(matches="x")
+
+    # 8) Mostrar
+    return fr
+
 
 
 def plot_all_variables(df: pd.DataFrame) -> go.Figure:

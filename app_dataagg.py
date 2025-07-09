@@ -140,7 +140,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             """
             )
             con.execute("BEGIN TRANSACTION;")
-            chunk = 5000
+            chunk = 10000
             for i in range(0, len(df_load), chunk):
                 c = df_load.iloc[i : i + chunk]
                 con.register("tmp", c)
@@ -230,6 +230,7 @@ def server(input: Inputs, output: Outputs, session: Session):
             label="Columns",
             choices=cols,
             selected=cols[0] if cols else None,
+            inline = True
         )
 
     @output
