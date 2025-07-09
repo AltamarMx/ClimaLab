@@ -1,5 +1,5 @@
 from shiny import App, ui, render
-from shinywidgets import render_plotly
+from shinywidgets import render_plotly, render_widget
 import shinyswatch
 
 from utils.config import name
@@ -45,8 +45,8 @@ app_ui = ui.page_fillable(
 def server(input, output, session):
 
 
-    @output
-    @render_plotly
+    # @output
+    @render.ui
     def plot_matplotlib():
         # return graph_all_matplotlib(input.fechas())
         return graph_all_plotly_resampler(input.fechas())

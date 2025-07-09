@@ -14,7 +14,7 @@ def panel_explorador():
             language="es",
             separator="a",
         ),
-        output_widget("plot_matplotlib",fill=True),
+        ui.output_ui("plot_matplotlib"),
     )
 
 
