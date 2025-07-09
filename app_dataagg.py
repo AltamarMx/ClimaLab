@@ -225,11 +225,11 @@ def server(input: Inputs, output: Outputs, session: Session):
         if df is None:
             return None
         cols = list(df.columns)
-        return ui.input_checkbox_group(
+        return ui.input_radio_buttons(
             id="plot_columns",
             label="Columns",
             choices=cols,
-            selected=cols,
+            selected=cols[0] if cols else None,
         )
 
     @output
@@ -238,7 +238,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         df = rv_plot_all.get()  # DataFrame cargado reactivo
         if df is None:
             return None
-        cols = input.plot_columns() or list(df.columns)
+        col = input.plot_columns()
+        cols = [col] if col else list(df.columns)
         return plot_all(df, cols)
 
     @render.data_frame
