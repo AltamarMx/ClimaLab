@@ -159,7 +159,10 @@ def graph_all_plotly_resampler(fechas, db_path=db_name, max_samples=1000):
     fr.update_xaxes(matches="x")
 
     # 8) Mostrar
-    return fr
+    # `FigureResampler` objects come from the plotly-resampler package and are
+    # not directly supported by `shinywidgets`. Convert it to a plain Plotly
+    # figure so that it can be rendered by `render_plotly`.
+    return go.Figure(fr)
 
 
 
