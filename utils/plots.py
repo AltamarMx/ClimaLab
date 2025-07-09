@@ -2,7 +2,11 @@ import pandas as pd
 import plotly.graph_objects as go
 from .data_processing import load_csv, radiacion
 from .config import variables
+import missingno as msno
+import matplotlib
+import matplotlib.pyplot as plt
 
+matplotlib.use("Agg")
 
 
 def plot_all_variables(df: pd.DataFrame) -> go.Figure:
@@ -24,32 +28,35 @@ def plot_all_variables(df: pd.DataFrame) -> go.Figure:
     df = df.reset_index()
 
     # 2. Format 'TIMESTAMP' as text strings for plotting
-    df["timestamp"] = df["TIMESTAMP"].dt.strftime("%Y-%m-%d %H:%M")
+    df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%d %H:%M")
 
     # 3. Select the list of variables to plot, excluding the formatted timestamp
     columns = list(variables.values())
-    columns.remove('timestamp')
+    columns.remove("timestamp")
 
     # 4. Build the Plotly figure and add a Scattergl trace for each variable
     fig = go.Figure()
     for var in columns:
         fig.add_trace(
             go.Scattergl(
-                x=df.timestamp,          # x-axis: formatted timestamp strings
-                y=df[var],               # y-axis: variable values
-                mode="markers",         # display markers only
-                name=var,                # legend label for this trace
-                marker=dict(size=5),     # marker size
+                x=df.timestamp,  # x-axis: formatted timestamp strings
+                y=df[var],  # y-axis: variable values
+                mode="markers",  # display markers only
+                name=var,  # legend label for this trace
+                marker=dict(size=5),  # marker size
             )
         )
 
-    # 5. Configure layout: unified hover, axis titles, and legend
+    # # 5. Configure layout: unified hover, axis titles, and legend
     fig.update_layout(
         hovermode="x unified",
         showlegend=True,
         xaxis_title="timestamp",
         yaxis_title="Values",
     )
+
+    # 3) Si usas Plotly Express, añade también:
+    # fig.update_traces(hoverinfo='skip', hovertemplate=None)
 
     # 6. Configure x-axis: grid, tick format, and automatic ticks
     fig.update_xaxes(
@@ -65,28 +72,57 @@ def plot_all_variables(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
+def plot_missingno(df: pd.DataFrame):
+    """ """
+    fig, ax = plt.subplots(layout="constrained")
+    fig = msno.matrix(df, ax=ax, fontsize=7, sparkline=False)
+
+    # fig = msno.matrix(df,fontsize=7)
+
+    return fig
+
+
+def plot_all(df: pd.DataFrame, columns: list[str] | None = None):
+    """Plot selected columns of *df* using Matplotlib."""
+
+    if columns is None:
+        columns = list(df.columns)
+
+    fig, ax = plt.subplots()
+
+    for column in columns:
+        ax.plot(df[column], label=column)
+
+    if columns:
+        ax.legend()
+
+    return fig
+
+
 def graficado_radiacion(path_archivo: str, rad_columns: list[str] = None) -> go.Figure:
     # 1. cargar datos y calcular radiación nocturna
     df = load_csv(path_archivo)
     df_rad = radiacion(df, rad_columns)
 
     # 2. preparar TIMESTAMP para graficar
-    df_plot = df_rad.reset_index().rename(columns={'index': 'TIMESTAMP'})
-    df_plot['TIMESTAMP'] = pd.to_datetime(df_plot['TIMESTAMP'], errors='coerce')
-    df_plot = df_plot.dropna(subset=['TIMESTAMP'])
-    df_plot['TIMESTAMP'] = df_plot['TIMESTAMP'].dt.strftime('%Y-%m-%d %H:%M')
+    df_plot = df_rad.reset_index().rename(columns={"index": "TIMESTAMP"})
+    df_plot["TIMESTAMP"] = pd.to_datetime(df_plot["TIMESTAMP"], errors="coerce")
+    df_plot = df_plot.dropna(subset=["TIMESTAMP"])
+    df_plot["TIMESTAMP"] = df_plot["TIMESTAMP"].dt.strftime("%Y-%m-%d %H:%M")
 
     # 3. determinar columnas a graficar (excluyendo altura_solar)
-    cols_to_plot = [col for col in df_plot.columns if col not in ['TIMESTAMP', 'altura_solar']]
+    cols_to_plot = [
+        col for col in df_plot.columns if col not in ["TIMESTAMP", "altura_solar"]
+    ]
 
     # 4. construir figura
     fig = go.Figure()
     for col in cols_to_plot:
         fig.add_trace(
             go.Scattergl(
-                x=df_plot['TIMESTAMP'],
+                x=df_plot["TIMESTAMP"],
                 y=df_plot[col],
-                mode='markers',
+                mode="markers",
                 name=col,
                 marker=dict(size=5),
             )
@@ -95,10 +131,54 @@ def graficado_radiacion(path_archivo: str, rad_columns: list[str] = None) -> go.
     # 5. configurar layout
     fig.update_layout(
         showlegend=True,
-        xaxis_title='TIMESTAMP',
-        yaxis_title='Valores',
+        xaxis_title="TIMESTAMP",
+        yaxis_title="Valores",
     )
-    fig.update_xaxes(showgrid=True, tickformat='%Y-%m-%d %H:%M', tickmode='auto')
+    fig.update_xaxes(showgrid=True, tickformat="%Y-%m-%d %H:%M", tickmode="auto")
+    fig.update_yaxes(showgrid=True)
+
+    return fig
+
+
+def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
+    """Plot irradiance data highlighting detected outliers per variable."""
+
+    df_plot = df.reset_index()
+    # df_plot = df.copy()
+    df_plot["timestamp"] = df_plot["timestamp"].dt.strftime("%Y-%m-%d %H:%M")
+
+    fig = go.Figure()
+    irr_cols = [c for c in ["dni", "ghi", "dhi"] if c in df_plot.columns]
+
+    colors = {"dni": "#1f77b4", "ghi": "#2ca02c", "dhi": "#ff7f0e"}
+    for col in irr_cols:
+        flag = df_plot.get(f"{col}_outlier", pd.Series(False, index=df_plot.index))
+        fig.add_trace(
+            go.Scattergl(
+                x=df_plot.loc[~flag, "timestamp"],
+                y=df_plot.loc[~flag, col],
+                mode="markers",
+                name=col,
+                marker=dict(size=5, color=colors.get(col, "blue")),
+            )
+        )
+        fig.add_trace(
+            go.Scattergl(
+                x=df_plot.loc[flag, "timestamp"],
+                y=df_plot.loc[flag, col],
+                mode="markers",
+                name=f"{col} outlier",
+                marker=dict(size=7, color="red", symbol="x"),
+            )
+        )
+
+    fig.update_layout(
+        hovermode="x unified",
+        showlegend=True,
+        xaxis_title="timestamp",
+        yaxis_title="Irradiance [W/m²]",
+    )
+    fig.update_xaxes(showgrid=True, tickformat="%Y-%m-%d %H:%M", tickmode="auto")
     fig.update_yaxes(showgrid=True)
 
     return fig
