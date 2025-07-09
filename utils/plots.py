@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 
 import plotly.graph_objects as go
 from plotly_resampler import FigureWidgetResampler, register_plotly_resampler
+from plotly_resampler.aggregation import FuncAggregator
 
 # Enable dynamic resampling when working in widget based environments
 register_plotly_resampler(mode="widget")
@@ -98,6 +99,7 @@ def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
 
 
 
+
 def graph_all_plotly_resampler(db_path=db_name):
     """Return a Plotly figure with dynamic resampling enabled."""
 
@@ -114,56 +116,78 @@ def graph_all_plotly_resampler(db_path=db_name):
 
     # 2) Prepare timestamps for plotting
     df = df.reset_index()
-    # Avoid formatting the timestamp as a string so Plotly can
-    # correctly interpret it as a date.  Using actual datetime
-    # objects ensures the range slider spans the complete data
-    # range when rendered in Shiny.
     df["timestamp"] = df["date"]
 
-    # ── 1. Crea la figura y añade la serie ──────────────────────────────────────────
-    fig = go.Figure()
+    # Aggregator helpers for daily statistics
+    def _daily_mean(x, y, n_out):
+        ser = pd.Series(y, index=pd.to_datetime(x))
+        res = ser.resample("D").mean().dropna()
+        return res.index.to_numpy(), res.values
 
+    def _daily_max(x, y, n_out):
+        ser = pd.Series(y, index=pd.to_datetime(x))
+        res = ser.resample("D").max().dropna()
+        return res.index.to_numpy(), res.values
+
+    def _daily_min(x, y, n_out):
+        ser = pd.Series(y, index=pd.to_datetime(x))
+        res = ser.resample("D").min().dropna()
+        return res.index.to_numpy(), res.values
+
+    MONTH_POINTS = 60 * 24 * 31  # Number of minute samples in ~1 month
+
+    fig = FigureWidgetResampler(go.Figure(), default_n_shown_samples=MONTH_POINTS)
+
+    # Raw temperature series (visible for < 1 month)
     fig.add_trace(
-        go.Scattergl(
-            # Pass the datetime objects directly so Plotly treats
-            # the x‑axis values as dates
-            x=df['timestamp'],
-            y=df['tdb'],
-            mode='lines',        # «markers» si prefieres puntos
-            name='Temperatura BD'  # Etiqueta de la serie
-        )
+        go.Scattergl(mode="lines", name="tdb"),
+        hf_x=df["timestamp"],
+        hf_y=df["tdb"],
     )
 
-    # ── 2. Configura el rango, selector y slider ────────────────────────────────────
+    # Daily aggregated statistics used for larger ranges
+    fig.add_trace(
+        go.Scattergl(name="tdb mean", line=dict(color="orange")),
+        hf_x=df["timestamp"],
+        hf_y=df["tdb"],
+        downsampler=FuncAggregator(_daily_mean),
+    )
+    fig.add_trace(
+        go.Scattergl(name="tdb max", line=dict(color="red")),
+        hf_x=df["timestamp"],
+        hf_y=df["tdb"],
+        downsampler=FuncAggregator(_daily_max),
+    )
+    fig.add_trace(
+        go.Scattergl(name="tdb min", line=dict(color="blue")),
+        hf_x=df["timestamp"],
+        hf_y=df["tdb"],
+        downsampler=FuncAggregator(_daily_min),
+    )
+
+    # Configure range selector and slider
     fig.update_layout(
         xaxis=dict(
-            # Botones rápidos de rango (opcional)
             rangeselector=dict(
                 buttons=[
-                    dict(count=1, label="1 m",   step="month", stepmode="backward"),
-                    dict(count=6, label="6 m",   step="month", stepmode="backward"),
-                    dict(count=1, label="YTD",   step="year",  stepmode="todate"),
-                    dict(count=1, label="1 a",   step="year",  stepmode="backward"),
-                    dict(step="all", label="Todo")
+                    dict(count=1, label="1 m", step="month", stepmode="backward"),
+                    dict(count=6, label="6 m", step="month", stepmode="backward"),
+                    dict(count=1, label="YTD", step="year", stepmode="todate"),
+                    dict(count=1, label="1 a", step="year", stepmode="backward"),
+                    dict(step="all", label="Todo"),
                 ]
             ),
-            # Slider inferior
             rangeslider=dict(visible=True),
-            type="date"   # ← IMPORTANTE: obliga a tratar el eje como fechas
+            type="date",
         ),
-        yaxis_title="tbd",
+        yaxis_title="tdb",
         xaxis_title="Fecha",
-        hovermode="x unified",  # Tooltip único por columna de tiempo
-        template="plotly_white", # Estilo limpio; quítalo si usas tu propio template
-        margin=dict(t=40, r=10, b=40, l=60)
+        hovermode="x unified",
+        template="plotly_white",
+        margin=dict(t=40, r=10, b=40, l=60),
     )
 
     return fig
-
-
-
-
-
 
 def plot_all_variables(df: pd.DataFrame) -> go.Figure:
     """
