@@ -21,7 +21,10 @@ import matplotlib.pyplot as plt
 
 
 import plotly.graph_objects as go
-from plotly_resampler import FigureWidgetResampler
+from plotly_resampler import FigureWidgetResampler, register_plotly_resampler
+
+# Enable dynamic resampling when working in widget based environments
+register_plotly_resampler(mode="widget")
 
 
 def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
@@ -95,10 +98,12 @@ def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
 
 
 
-def graph_all_plotly_resampler( db_path=db_name, max_samples=1000):
-    # 1) Carga y pivoteo
+def graph_all_plotly_resampler(db_path=db_name, max_samples=1000):
+    """Return a Plotly figure with dynamic resampling enabled."""
+
+    # 1) Load data and pivot into wide format
     con = duckdb.connect(db_path)
-    q = f"""
+    q = """
     SELECT *
       FROM lecturas
      ORDER BY date
@@ -106,28 +111,29 @@ def graph_all_plotly_resampler( db_path=db_name, max_samples=1000):
     df = con.execute(q).fetchdf()
     con.close()
     df = df.pivot(index="date", columns="variable", values="value")
-    
-    # 1. Reset index to turn 'TIMESTAMP' into a column of type datetime
-    df = df.reset_index()
 
-    # 2. Format 'TIMESTAMP' as text strings for plotting
+    # 2) Prepare timestamps for plotting
+    df = df.reset_index()
     df["timestamp"] = df["date"].dt.strftime("%Y-%m-%d %H:%M")
 
-    # 3. Select the list of variables to plot, excluding the formatted timestamp
-    columns = list(variables.values())
-    columns.remove("timestamp")
+    # 3) Build the Plotly figure with resampler support
+    fig = FigureWidgetResampler(go.Figure(), default_n_shown_samples=max_samples)
 
-    # 4. Build the Plotly figure and add a Scattergl trace for each variable
-    # fig = go.Figure()
-    fig = FigureWidgetResampler(go.Figure())
+    for var in [v for v in variables.values() if v != "timestamp"]:
+        fig.add_trace(
+            go.Scattergl(name=var, showlegend=True),
+            hf_x=df["timestamp"],
+            hf_y=df[var],
+        )
 
-    fig.add_trace(
-        go.Scattergl(name='algo'),
-        hf_x=df.timestamp,  # x-axis: formatted timestamp strings
-        hf_y=df['tdb'],  # y-axis: variable values
+    fig.update_layout(
+        hovermode="x unified",
+        showlegend=True,
+        xaxis_title="timestamp",
+        yaxis_title="Values",
     )
-    
-
+    fig.update_xaxes(showgrid=True, tickformat="%Y-%m-%d %H:%M", tickmode="auto")
+    fig.update_yaxes(showgrid=True)
 
     return fig
 
