@@ -25,10 +25,10 @@ variables_types = {
     "wd":   "float64",
     "p_atm": "float64",
     "rain_acc": "float64",
-}
+} 
 
 latitude = 18.5
-longitude = -100
+longitude = -99
 gmt = -6
 name = 'ClimaLab'
 min_year = 2001

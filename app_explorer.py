@@ -13,6 +13,7 @@ from components.panels import (
     panel_eolica,
     panel_confort,
 )
+from components.sun_path_server import sun_path_server
 
 # from utils.data_processing import load_esolmet_data
 from utils.plots import plot_explorer_matplotlib
@@ -90,6 +91,10 @@ def server(input, output, session):
             df.to_csv(buf, index=True)
             buf.seek(0)
             yield buf.getvalue()
+
+            
+    sun_path_server(input, output, session)
+
 
 
 app = App(app_ui, server)
