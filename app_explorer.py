@@ -16,7 +16,7 @@ from components.panels import (
 )
 
 # from utils.data_processing import load_esolmet_data
-from utils.plots import graph_all_plotly_resampler, graph_all_matplotlib
+from utils.plots import graph_all_plotly_resampler, plot_explorer_matplotlib
 
 
 app_ui = ui.page_fillable(
@@ -49,11 +49,11 @@ def server(input, output, session):
 
     @output
     @render_widget
-    def plot_resampler():
+    def plot_explorer():
         fechas = input.fechas()
         if fechas is not None:
-            return graph_all_plotly_resampler(fechas)
-        return graph_all_plotly_resampler()
+            return plot_explorer_matplotlib(fechas)
+        return plot_explorer_matplotlib()
 
     def _query_df(fechas):
         con = duckdb.connect(db_name)

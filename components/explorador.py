@@ -14,7 +14,7 @@ def panel_explorador():
             language="es",
             separator="a",
         ),
-        output_widget("plot_resampler"),
+        output_widget("plot_explorer"),
         ui.div(
             ui.download_button(
                 "dl_parquet",
