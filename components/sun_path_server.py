@@ -38,14 +38,9 @@ def sun_path_server(input, output, session):
         return datos().reset_index().head(100)
 
     @output
-    @render.download
+    @render.download(
+        filename="trayectoria_solar.csv", media_type="text/csv"
+    )
     def descargar_datos():
-        def writer():
-            buffer=io.StringIO()
-            datos().head(100).to_csv(buffer,index=False)
-            contenido = buffer.getvalue()
-            buffer.close()
-
-            yield contenido.encode('utf-8')
-        return writer
+        yield datos().head(100).to_csv(index=False)
     
