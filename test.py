@@ -1,16 +1,32 @@
-# %%
-import plotly.graph_objects as go; import numpy as np
-from plotly_resampler import FigureResampler, FigureWidgetResampler
+# %% -------------------------------------------------------------------------
+# 1. Imports, conexión y DataFrame base
+import pandas as pd
+import duckdb
+import plotly.graph_objects as go
+
+
+con = duckdb.connect("./climalab.db")
+df = (
+    con.execute("SELECT * FROM lecturas ORDER BY date")
+       .fetchdf()
+)
+con.close()
+
+df = (
+    df.pivot(index="date", columns="variable", values="value")
+      .reset_index()
+)
+df["date"] = pd.to_datetime(df["date"])            # por si no viene como datetime
+df.info()
 
 # %%
-x = np.arange(1_000_000)
-noisy_sin = (3 + np.sin(x / 200) + np.random.randn(len(x)) / 10) * x / 1_000
+tdb_maxmin = (
+    df
+    .resample("D", on="date")              # “D” = frecuencia diaria
+    .agg(tdb_min=("tdb", "min"),           # columna nueva con el mínimo
+         tdb_max=("tdb", "max"))           # columna nueva con el máximo
+    .reset_index()                         # opcional, para volver a tener date como columna
+)
 
-# %%
-# OPTION 1 - FigureResampler: dynamic aggregation via a Dash web-app
-fig = FigureResampler(go.Figure())
-fig.add_trace(go.Scattergl(name='noisy sine', showlegend=True), hf_x=x, hf_y=noisy_sin)
-
-fig.show_dash(mode='inline')
-
+tdb_maxmin
 # %%

@@ -4,6 +4,7 @@ from windrose import WindroseAxes
 from matplotlib.gridspec import GridSpec   
 import numpy as np
 
+from plotly.subplots import make_subplots
 
 from utils.data_processing import load_csv, radiacion
 from utils.config import variables
@@ -21,7 +22,11 @@ import matplotlib.pyplot as plt
 
 
 import plotly.graph_objects as go
-from plotly_resampler import FigureWidgetResampler
+# from plotly_resampler import FigureWidgetResampler, register_plotly_resampler
+# from plotly_resampler.aggregation import FuncAggregator
+
+# Enable dynamic resampling when working in widget based environments
+# register_plotly_resampler(mode="widget")
 
 
 def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
@@ -95,46 +100,183 @@ def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
 
 
 
-def graph_all_plotly_resampler( db_path=db_name, max_samples=1000):
-    # 1) Carga y pivoteo
-    con = duckdb.connect(db_path)
-    q = f"""
-    SELECT *
-      FROM lecturas
-     ORDER BY date
+
+def graph_all_plotly_resampler(fechas=None, db_path=db_name):
+    """Return a Plotly figure with dynamic resampling enabled.
+
+    Parameters
+    ----------
+    fechas : tuple[str, str] | None
+        Optional start/end dates in ISO format ``YYYY-MM-DD``. When provided,
+        only records within this interval are loaded from the database.
+    db_path : str
+        Path to the DuckDB database.
     """
+
+    # 1) Load data and pivot into wide format
+    con = duckdb.connect(db_path)
+
+    if fechas is None:
+        q = """
+        SELECT *
+          FROM lecturas
+         ORDER BY date
+        """
+    else:
+        q = f"""
+        SELECT *
+          FROM lecturas
+         WHERE date >= TIMESTAMP '{fechas[0]}'
+           AND date <= TIMESTAMP '{fechas[1]}'
+         ORDER BY date
+        """
     df = con.execute(q).fetchdf()
     con.close()
     df = df.pivot(index="date", columns="variable", values="value")
-    
-    # 1. Reset index to turn 'TIMESTAMP' into a column of type datetime
+
+    # 2) Prepare timestamps for plotting
     df = df.reset_index()
-
-    # 2. Format 'TIMESTAMP' as text strings for plotting
-    df["timestamp"] = df["date"].dt.strftime("%Y-%m-%d %H:%M")
-
-    # 3. Select the list of variables to plot, excluding the formatted timestamp
-    columns = list(variables.values())
-    columns.remove("timestamp")
-
-    # 4. Build the Plotly figure and add a Scattergl trace for each variable
-    # fig = go.Figure()
-    fig = FigureWidgetResampler(go.Figure())
-
-    fig.add_trace(
-        go.Scattergl(name='algo'),
-        hf_x=df.timestamp,  # x-axis: formatted timestamp strings
-        hf_y=df['tdb'],  # y-axis: variable values
+    df["timestamp"] = df["date"]
+    
+    tdb = (
+        df
+        .resample("D", on="date")              # “D” = frecuencia diaria
+        .agg(tdb_min=("tdb", "min"),           # columna nueva con el mínimo
+            tdb_max=("tdb", "max"),
+            tdb_mean=('tdb','mean')
+            )           # columna nueva con el máximo
+        .reset_index()                         # opcional, para volver a tener date como columna
     )
     
+    hourly = (
+        df
+        .resample("h", on="date")
+        .agg(
+            dni_mean=("dni", "max"),
+            dhi_mean=("dhi", "max"),
+            ghi_mean=("ghi", "max"),
+        )
+        .reset_index()
+    )
+
+
+    # %% -------------------------------------------------------------------------
+    # 4) Crear subplots: fila 1 = TDB, fila 2 = irradiancias
+    fig = make_subplots(
+        rows=2, cols=1,
+        shared_xaxes=True,
+        vertical_spacing=0.08,
+        # subplot_titles=(
+        #     "TDB diario (min–max + media)",
+        #     "Irradiancias horario (DNI, DHI, GHI)",
+        # )
+    )
+
+    # — TDB (fila 1) —
+    # techo invisible
+    fig.add_trace(
+        go.Scatter(
+            x=tdb["date"], y=tdb["tdb_max"],
+            line=dict(width=0), showlegend=False, hoverinfo="skip"
+        ),
+        row=1, col=1
+    )
+    # banda min–max
+    fig.add_trace(
+        go.Scatter(
+            x=tdb["date"], y=tdb["tdb_min"],
+            fill="tonexty", fillcolor="rgba(255,0,0,0.2)",
+            line=dict(width=0),
+            hovertemplate="Min: %{y:.1f} °C<br>Max: %{customdata:.1f} °C",
+            customdata=tdb["tdb_max"],
+            showlegend=False
+        ),
+        row=1, col=1
+    )
+    # media diaria
+    fig.add_trace(
+        go.Scatter(
+            x=tdb["date"], y=tdb["tdb_mean"],
+            line=dict(color="red", width=2),
+            name="TDB media",
+            hovertemplate="Media: %{y:.1f} °C", 
+            showlegend=False
+        ),
+        row=1, col=1
+    )
+
+    # — Irradiancias (fila 2) —
+    fig.add_trace(
+        go.Scatter(
+            x=hourly["date"], y=hourly["dni_mean"],
+            mode="lines", 
+            name="DNI",
+            hovertemplate="DNI: %{y:.1f} W/m²",
+            showlegend=False
+        ),
+        row=2, col=1
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=hourly["date"], y=hourly["dhi_mean"],
+            mode="lines", 
+            name="DHI",
+            hovertemplate="DHI: %{y:.1f} W/m²",
+            showlegend=False
+        ),
+        row=2, col=1
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=hourly["date"], y=hourly["ghi_mean"],
+            mode="lines", 
+            name="GHI",
+            hovertemplate="GHI: %{y:.1f} W/m²",
+            showlegend=False
+        ),
+        row=2, col=1
+    )
+
+    # %% -------------------------------------------------------------------------
+    # 5) Layout y controles de rango
+    fig.update_layout(
+        template="ggplot2",
+        hovermode="x unified",
+        xaxis=dict(
+            autorange=True,
+            rangeslider=dict(
+                autorange=True,
+            ),
+            type="date"
+    ),
+        # margin=dict(t=60, b=40, l=60, r=10),
+    )
+
+    # Sólo al eje x de la fila 2 (inferior) le asignamos rangeselector + rangeslider
+    fig.update_xaxes(
+        rangeselector=dict(
+            buttons=[
+                dict(count=1,  label="1 m", step="month", stepmode="backward"),
+                dict(count=6,  label="6 m", step="month", stepmode="backward"),
+                # dict(count=1,  label="YTD", step="year",  stepmode="todate"),
+                dict(count=1,  label="1 a", step="year",  stepmode="backward"),
+                dict(step="all", label="Todo")
+            ]
+        ),
+        # rangeslider=dict(visible=True),
+        # type="date",
+        row=1, col=1
+    )
+
+
+    # Etiquetas de ejes
+    fig.update_yaxes(title_text="TDB (°C)", row=1, col=1)
+    fig.update_yaxes(title_text="Irradiancia (W/m²)", row=2, col=1)
+    fig.update_xaxes(title_text="Fecha", row=2, col=1)
+
 
 
     return fig
-
-
-
-
-
 
 def plot_all_variables(df: pd.DataFrame) -> go.Figure:
     """
@@ -311,32 +453,72 @@ def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-# def graficado_nulos(df):
-#     na_counts = df.isna().sum()
-#     cols_with_na = na_counts[na_counts > 0].index.tolist()
-#     if not cols_with_na:
-#         fig = plt.figure(figsize=(8, 4))
-#         fig.suptitle("Sin valores nulos")
-#         return fig
 
-#     fig, ax = plt.subplots(
-#         figsize=(
-#             max(14, 0.6 * len(cols_with_na)),
-#             8
-#         )
-#     )
-#     msno.bar(
-#         df[cols_with_na],
-#         ax=ax,
-#         fontsize=10,
-#         sort="descending"
-#     )
 
-#     plt.setp(ax.get_xticklabels(), ha="right")
-#     ax.grid(axis="y", alpha=0.3)
-#     ax.set_ylabel("Proporción")
+def plot_explorer_matplotlib(fechas, alias_dict=None):
 
-#     if len(fig.axes) > 1:
-#         fig.axes[1].set_ylabel("Conteo")
+    # 1) No es necesario usar alias; las columnas ya tienen nombres universales
+    con = duckdb.connect(db_name)
 
-#     return fig
+    # 2) Carga y pivoteo
+    query = f"""
+    SELECT *
+      FROM lecturas
+     WHERE date >= TIMESTAMP '{fechas[0]}'
+       AND date <= TIMESTAMP '{fechas[1]}'
+     ORDER BY date
+    """
+    df = con.execute(query).fetchdf()
+    df = df.pivot(index="date", columns="variable", values="value")
+
+    # 3) Figure + GridSpec
+    fig = plt.figure()
+    # fig.set_constrained_layout(True)
+
+    gs = GridSpec(
+        nrows=4,
+        ncols=2,
+        width_ratios=[4, 1],
+        height_ratios=[1, 1, 1, 1],
+        #    wspace=0.1, hspace=0.1,
+        figure=fig,
+    )
+
+    ax_tdb = fig.add_subplot(gs[0, 0])
+    ax_rh = fig.add_subplot(gs[1, 0], sharex=ax_tdb)
+    ax_p = fig.add_subplot(gs[2, 0], sharex=ax_tdb)
+    ax_i = fig.add_subplot(gs[3, 0], sharex=ax_tdb)
+    ax_wind = fig.add_subplot(gs[:, 1], projection="windrose")
+
+
+    # Graficar temperatura
+    ax_tdb.plot(df.index, df.tdb, label="tdb", c="k", alpha=0.8)
+    ax_tdb.set_ylabel("Temperatura [°C]")
+    ax_tdb.legend(loc="upper left")
+
+    # Graficar presión
+    ax_p.plot(df.p_atm, label="p_atm", alpha=0.8)
+    ax_p.set_ylabel("Presión [Pa]")
+    ax_p.legend(loc="upper left")
+
+    # Graficar Is
+    ax_i.plot(df.index, df.ghi, label="ghi")
+    ax_i.plot(df.index, df.dni, label="dni")
+    ax_i.plot(df.index, df.dhi, label="dhi")
+    ax_i.set_ylabel("Irradiancia [W/m2]")
+    ax_i.legend(loc="upper left")
+
+    # Graficar humedad relativa hr
+    ax_rh.plot(df.rh, label="rh")
+    ax_rh.set_ylim(0, 100)
+    ax_rh.set_ylabel("HR [%]")
+    ax_rh.legend()
+
+    # 5) Rosa de vientos
+    ax_wind.bar(df.wd, df.ws, normed=True, opening=0.8, edgecolor="white")
+    ax_wind.set_title("Rosa de Vientos")
+
+    # 6) Formato de fecha en eje X
+    fig.autofmt_xdate()
+
+    return fig
