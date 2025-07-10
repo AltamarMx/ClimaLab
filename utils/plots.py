@@ -464,12 +464,12 @@ def plot_explorer_matplotlib(fechas, alias_dict=None):
     query = f"""
     SELECT *
       FROM lecturas
-     WHERE fecha >= TIMESTAMP '{fechas[0]}'
-       AND fecha <= TIMESTAMP '{fechas[1]}'
-     ORDER BY fecha
+     WHERE date >= TIMESTAMP '{fechas[0]}'
+       AND date <= TIMESTAMP '{fechas[1]}'
+     ORDER BY date
     """
     df = con.execute(query).fetchdf()
-    df = df.pivot(index="fecha", columns="variable", values="valor")
+    df = df.pivot(index="date", columns="variable", values="value")
 
     # 3) Figure + GridSpec
     fig = plt.figure()

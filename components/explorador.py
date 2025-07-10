@@ -7,9 +7,9 @@ def panel_explorador():
             "fechas",
             "Fechas:",
             start="2023-01-01",
-            end="2023-12-31",
+            end="2025-12-31",
             min="2010-01-01",
-            max="2025-12-31",
+            max="2030-12-31",
             language="es",
             separator="a",
         ),
@@ -17,15 +17,15 @@ def panel_explorador():
         ui.div(
             ui.download_button(
                 "dl_parquet",
-                "Descargar Parquet",
-                class_="btn btn-outline-primary me-2",
+                "Download parquet",
+                # class_="btn btn-outline-primary",
             ),
             ui.download_button(
                 "dl_csv",
-                "Descargar CSV",
-                class_="btn btn-outline-primary",
+                "Download csv",
+                # class_="btn btn-outline-primary",
             ),
-            class_="mt-3",
+            class_="d-flex justify-content-center gap-1 "
         ),
     )
 
