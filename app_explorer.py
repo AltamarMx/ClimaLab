@@ -1,5 +1,4 @@
 from shiny import App, ui, render
-from shinywidgets import render_widget
 import shinyswatch
 import duckdb
 import io
@@ -16,7 +15,7 @@ from components.panels import (
 )
 
 # from utils.data_processing import load_esolmet_data
-from utils.plots import graph_all_plotly_resampler, plot_explorer_matplotlib
+from utils.plots import plot_explorer_matplotlib
 
 
 app_ui = ui.page_fillable(
@@ -48,7 +47,7 @@ def server(input, output, session):
 
 
     @output
-    @render_widget
+    @render.plot
     def plot_explorer():
         fechas = input.fechas()
         if fechas is not None:
