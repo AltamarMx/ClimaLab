@@ -101,16 +101,35 @@ def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
 
 
 
-def graph_all_plotly_resampler(db_path=db_name):
-    """Return a Plotly figure with dynamic resampling enabled."""
+def graph_all_plotly_resampler(fechas=None, db_path=db_name):
+    """Return a Plotly figure with dynamic resampling enabled.
+
+    Parameters
+    ----------
+    fechas : tuple[str, str] | None
+        Optional start/end dates in ISO format ``YYYY-MM-DD``. When provided,
+        only records within this interval are loaded from the database.
+    db_path : str
+        Path to the DuckDB database.
+    """
 
     # 1) Load data and pivot into wide format
     con = duckdb.connect(db_path)
-    q = """
-    SELECT *
-      FROM lecturas
-     ORDER BY date
-    """
+
+    if fechas is None:
+        q = """
+        SELECT *
+          FROM lecturas
+         ORDER BY date
+        """
+    else:
+        q = f"""
+        SELECT *
+          FROM lecturas
+         WHERE date >= TIMESTAMP '{fechas[0]}'
+           AND date <= TIMESTAMP '{fechas[1]}'
+         ORDER BY date
+        """
     df = con.execute(q).fetchdf()
     con.close()
     df = df.pivot(index="date", columns="variable", values="value")
