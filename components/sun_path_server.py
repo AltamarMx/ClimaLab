@@ -42,5 +42,11 @@ def sun_path_server(input, output, session):
         filename="trayectoria_solar.csv", media_type="text/csv"
     )
     def descargar_datos():
-        yield datos().head(100).to_csv(index=False)
+        """Download the calculated solar path data as CSV."""
+        with io.StringIO() as buffer:
+            datos().head(100).to_csv(
+                buffer, index=True, index_label="datetime"
+            )
+            buffer.seek(0)
+            yield buffer.getvalue()
     
