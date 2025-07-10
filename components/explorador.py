@@ -1,5 +1,4 @@
 from shiny import ui
-from shinywidgets import output_widget
 
 def panel_explorador():
     return ui.nav_panel(
@@ -14,7 +13,7 @@ def panel_explorador():
             language="es",
             separator="a",
         ),
-        output_widget("plot_explorer"),
+        ui.output_plot("plot_explorer"),
         ui.div(
             ui.download_button(
                 "dl_parquet",
