@@ -936,12 +936,14 @@ def run_wind_simulation(  #ESTA SI
     try:
         with open(wind_inputs_file, "r", encoding="utf-8") as f:
             sam_data = json.load(f)
+            print(sam_data) 
     except FileNotFoundError:
         return {"error": f"No se encontró el archivo '{wind_inputs_file}'"}
 
     for key, val in sam_data.items():
         if key != "wind_resource_filename":
             wind.value(key, val)
+            print(key)
 
     wind.value("wind_resource_filename", str(csv_path))
     wind.value("wind_resource_shear", 0.14)

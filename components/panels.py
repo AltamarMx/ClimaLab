@@ -16,7 +16,6 @@ df_lect = conn.execute(
 df = df_lect.pivot(index="date", columns="variable", values="value")
 df.index = pd.to_datetime(df.index)
 df = df.sort_index()
-print('estoy en panels.py')
 
 def panel_estadistica():
     return ui.nav_panel("Estadística", "Aquí irá tu contenido estadístico")
