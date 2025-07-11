@@ -187,8 +187,8 @@ def figura_estereografica(solpos, lat, lon, tz='America/Mexico_City', usar_hora_
 
 
     fig.update_layout(
-        width=1000,
-        height=700,
+        # width=1000,
+        # height=700,
         title='Posición solar en coordenadas polares',
         legend=dict(
             title='Curvas por fecha',

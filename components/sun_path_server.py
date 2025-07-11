@@ -35,12 +35,12 @@ def sun_path_server(input, output, session):
     @output
     @render.data_frame
     def tabla():
-        return datos().reset_index().head(100)
+        return datos().reset_index()
 
     @output
     @render.download(
         filename="trayectoria_solar.csv", media_type="text/csv"
     )
     def descargar_datos():
-        yield datos().head(100).to_csv(index=False)
+        yield datos().to_csv(index=True)
     
