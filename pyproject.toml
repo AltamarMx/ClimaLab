@@ -17,6 +17,7 @@ dependencies = [
     "plotly-resampler>=0.11.0rc1",
     "pvlib>=0.13.0",
     "pyarrow>=20.0.0",
+    "pythermalcomfort>=3.3.0",
     "shiny>=1.4.0",
     "shinyswatch>=0.9.0",
     "shinywidgets>=0.6.2",
