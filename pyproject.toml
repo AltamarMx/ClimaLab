@@ -12,6 +12,7 @@ dependencies = [
     "matplotlib>=3.10.3",
     "missingno>=0.5.2",
     "nbformat>=5.10.4",
+    "nrel-pysam>=7.0.0",
     "pandas>=2.3.0",
     "plotly>=6.2.0",
     "plotly-resampler>=0.11.0rc1",

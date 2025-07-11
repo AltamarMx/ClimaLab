@@ -245,6 +245,7 @@ dependencies = [
     { name = "matplotlib" },
     { name = "missingno" },
     { name = "nbformat" },
+    { name = "nrel-pysam" },
     { name = "pandas" },
     { name = "plotly" },
     { name = "plotly-resampler" },
@@ -266,6 +267,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.10.3" },
     { name = "missingno", specifier = ">=0.5.2" },
     { name = "nbformat", specifier = ">=5.10.4" },
+    { name = "nrel-pysam", specifier = ">=7.0.0" },
     { name = "pandas", specifier = ">=2.3.0" },
     { name = "plotly", specifier = ">=6.2.0" },
     { name = "plotly-resampler", specifier = ">=0.11.0rc1" },
@@ -1309,6 +1311,33 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/83/f8/51569ac65d696c8ecbee95938f89d4abf00f47d58d48f6fbabfe8f0baefe/nest_asyncio-1.6.0.tar.gz", hash = "sha256:6f172d5449aca15afd6c646851f4e31e02c598d553a667e38cafa997cfec55fe", size = 7418, upload-time = "2024-01-21T14:25:19.227Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/c4/c2971a3ba4c6103a3d10c4b0f24f461ddc027f0f09763220cf35ca1401b3/nest_asyncio-1.6.0-py3-none-any.whl", hash = "sha256:87af6efd6b5e897c81050477ef65c62e2b2f35d51703cae01aff2905b1852e1c", size = 5195, upload-time = "2024-01-21T14:25:17.223Z" },
+]
+
+[[package]]
+name = "nrel-pysam"
+version = "7.0.0"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/28/eafa42c6db7ff76229f7501b5df5b3417ba89c764262c727a515d017907c/NREL_PySAM-7.0.0-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:756c0ca35341ea52906fbb138d97c18c98d03c9ad829c2d572b2bef006dcbbf8", size = 35461989, upload-time = "2025-04-17T17:02:32.104Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/57/e3dbe7c9c35a2ead681317221927d0aa919fee96f5867c0ab873325f292b/NREL_PySAM-7.0.0-cp310-cp310-macosx_12_0_x86_64.whl", hash = "sha256:b68bddc469fcd4b79d4a2baa1e69e45a71b85acc1f56130dbacc9f8cd898d286", size = 36238119, upload-time = "2025-04-21T15:06:32.749Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/3b/e833d486acef53a09233afbcc9033231240f4e56205de817c44e7a984eb7/NREL_PySAM-7.0.0-cp310-cp310-win_amd64.whl", hash = "sha256:6c2e603d88f6bcf5224e50e3074469351e37638f4e9b2e648b8a791151d80b90", size = 32693280, upload-time = "2025-04-17T17:03:14.482Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/9a/9ea17cae897a4c0f40f7a9b3e6ec6a11153bf1c7e4427402a1248126afe2/NREL_PySAM-7.0.0-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:c7c66da9f50805cf85835e68bca348027efbbe7c155d93e946c4f19c23f5dfb1", size = 35462263, upload-time = "2025-04-17T17:02:35.753Z" },
+    { url = "https://files.pythonhosted.org/packages/06/48/4a6575c25518922a52f5d89cdd4fefc8dde087f7029ac38a37a9b86da115/NREL_PySAM-7.0.0-cp311-cp311-macosx_12_0_x86_64.whl", hash = "sha256:1db135a2f09e9cbeb62e817ce9ca66d43d29b818bd8194e330b968979078ff5d", size = 36238011, upload-time = "2025-04-21T15:06:39.972Z" },
+    { url = "https://files.pythonhosted.org/packages/14/de/1233b9d00e40904018e4651777421aeb6e802540f65f80e873f2a30ecdad/NREL_PySAM-7.0.0-cp311-cp311-win_amd64.whl", hash = "sha256:e8df6bb4f10b17eb333e8ad665d5b8516c99df8e771626f3292a9c127b0b81be", size = 32501991, upload-time = "2025-04-17T17:03:20.204Z" },
+    { url = "https://files.pythonhosted.org/packages/90/62/785cff3d4db075849419dee41f79f34714e5a529b4837282d1d3f9d2892b/NREL_PySAM-7.0.0-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:520e991fd2f5e0b9404b1642b8870b59270ba29f4e520a0a8b146286d79db4fa", size = 35476974, upload-time = "2025-04-17T17:02:38.942Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/e3/6d623a5950d02a03087a701bb770f2648fc112bc6a8af7e57b7b74843369/NREL_PySAM-7.0.0-cp312-cp312-macosx_12_0_x86_64.whl", hash = "sha256:41a90a601e82a121b1d76ce24bd49d90f702d1a7437ba0703c6354c333aac30a", size = 36255969, upload-time = "2025-04-21T15:06:44.907Z" },
+    { url = "https://files.pythonhosted.org/packages/74/2a/eb1fd74bc0f3aa57fc549b37992b7a7e0ec5f25d2f5b77f1a37717f70afc/NREL_PySAM-7.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:802d88daae287e39ce8a325fcb513289b9f42f206653e4286c3979fce2bd5fcc", size = 32519144, upload-time = "2025-04-17T17:03:24.446Z" },
+    { url = "https://files.pythonhosted.org/packages/51/56/e24c53a9c8cab6b8ce24e35dd1e3a82705f4f431c9de74f1de2b9b6f11b4/NREL_PySAM-7.0.0-cp313-cp313-macosx_12_0_arm64.whl", hash = "sha256:5f7a669eef8bf227d5eefc8eac6a8602cf1eb4af3f03c7f4453abd6b91348f70", size = 35474194, upload-time = "2025-04-17T17:02:45.237Z" },
+    { url = "https://files.pythonhosted.org/packages/30/fd/3b013188eb0684499d82a8d6864c38c62b2408c91a50fe4c55deff3f66be/NREL_PySAM-7.0.0-cp313-cp313-macosx_12_0_x86_64.whl", hash = "sha256:6c4d3f6236ddb72b3d382f331b62365c379b1e331211c95fc0bf85e513ccb479", size = 36275714, upload-time = "2025-04-21T15:06:50.81Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/b9/0076421cc3370c7b7704a3f648f596e6cbfc90e768ea60859aad8110e726/NREL_PySAM-7.0.0-cp313-cp313-win_amd64.whl", hash = "sha256:6290fec6c7405ac03a792d92a09318f2f9cf61938881ed8cf02ed36db455219f", size = 32519644, upload-time = "2025-04-17T17:03:27.658Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/45/e4906f4d13782ac3fe9fbb682189877d34c4a567f268e1adcddb5837a224/nrel_pysam-7.0.0-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:c13a7c9965561407ac2f085720b70cabbbc28b33e018d8cb92a1b213a0b110ad", size = 44987274, upload-time = "2025-04-17T17:02:54.145Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/29/f348b59bc6e7c6b907773092e08937c392a24eb8284d2c8120282170c41b/nrel_pysam-7.0.0-cp310-cp310-manylinux2014_x86_64.whl", hash = "sha256:9feee942e4574143a23395c094f6008a48407c9a2bcbb02e7b9c19c24955f9e9", size = 46954463, upload-time = "2025-04-17T21:16:08.906Z" },
+    { url = "https://files.pythonhosted.org/packages/e0/5b/7e1cf49f9af85a04be44ee596fbe0b6514927a4496177dddadde156c9c51/nrel_pysam-7.0.0-cp311-cp311-manylinux2014_aarch64.whl", hash = "sha256:11173c3acdf76ac5b22f64a2b9aa4f98acb0dab5bf3a740c023266d1e60758c9", size = 45077800, upload-time = "2025-04-17T17:02:58.438Z" },
+    { url = "https://files.pythonhosted.org/packages/e9/3b/38d7393654fbde6c6488e4b5589810306630b741ea266c70eb66c856823d/nrel_pysam-7.0.0-cp311-cp311-manylinux2014_x86_64.whl", hash = "sha256:3d2c9954276c39936878c42ca98395dd3772e1b2f40d45f923bbe91368057ea9", size = 47048731, upload-time = "2025-04-17T21:16:12.89Z" },
+    { url = "https://files.pythonhosted.org/packages/5a/0b/38c739d99243fcc0a825b06164deeca0b4abba06f70d1fcd2c872e849d8a/nrel_pysam-7.0.0-cp312-cp312-manylinux2014_aarch64.whl", hash = "sha256:08cbea89271fc5463c1ccae45603f3d6aeec3c14712f30f2c92b6bacec1c5f91", size = 45193041, upload-time = "2025-04-17T17:03:04.415Z" },
+    { url = "https://files.pythonhosted.org/packages/c0/45/1f33d82b44cf5fe1c00c54cf04d68e52d4689f13fc535ee7d7c4c98895a9/nrel_pysam-7.0.0-cp312-cp312-manylinux2014_x86_64.whl", hash = "sha256:d3e3a1d28b72054fcbaecf02306f4e8bd91f66b121a7de9eea2385ce037d2258", size = 47249390, upload-time = "2025-04-17T21:16:17.496Z" },
+    { url = "https://files.pythonhosted.org/packages/47/2a/0b904e228bad28c3364748f53042215f16a609bfee17f6c47b473735bb39/nrel_pysam-7.0.0-cp313-cp313-manylinux2014_aarch64.whl", hash = "sha256:32a2443538f434693cb25bcb3b59e60c7f596a7d2cf7c3a719171198eeb28ba0", size = 45190998, upload-time = "2025-04-17T17:03:09.034Z" },
+    { url = "https://files.pythonhosted.org/packages/14/45/5444c3d4e2eea88d7ce01cf7f41bfd1d4b99aa47e6d0d7c1244f9710cc25/nrel_pysam-7.0.0-cp313-cp313-manylinux2014_x86_64.whl", hash = "sha256:82799153414a124615ef20106c4d888b85798d8e9bdbc7476c86531d5ab7152c", size = 47246830, upload-time = "2025-04-17T21:16:22.116Z" },
 ]
 
 [[package]]

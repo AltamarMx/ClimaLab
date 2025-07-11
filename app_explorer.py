@@ -17,6 +17,7 @@ from components.sun_path_server import sun_path_server
 from components.thermal_comfort_ui import panel_confort
 from components.thermal_comfort_server import thermal_comfort_server
 from components.explorer_server import explorer_server
+from components.wind_power_server import wind_power_server
 
 # from utils.data_processing import load_esolmet_data
 
@@ -51,6 +52,8 @@ def server(input, output, session):
     explorer_server(input,output,session)
     sun_path_server(input, output, session)
     thermal_comfort_server(input, output, session)
+    wind_power_server(input, output, session)
+
 
 
 
