@@ -9,13 +9,6 @@ import duckdb
 
 
 
-conn = duckdb.connect(database=db_name)
-df_lect = conn.execute(
-    "SELECT date, variable, value FROM lecturas"
-).df()
-df = df_lect.pivot(index="date", columns="variable", values="value")
-df.index = pd.to_datetime(df.index)
-df = df.sort_index()
 
 def panel_estadistica():
     return ui.nav_panel("Estadística", "Aquí irá tu contenido estadístico")
@@ -36,6 +29,14 @@ def panel_confort():
     return ui.nav_panel("Confort térmico", "Inserta aquí todo  sobre confort")
 
 def panel_eolica():
+    
+    conn = duckdb.connect(database=db_name)
+    df_lect = conn.execute(
+        "SELECT date, variable, value FROM lecturas"
+    ).df()
+    df = df_lect.pivot(index="date", columns="variable", values="value")
+    df.index = pd.to_datetime(df.index)
+    df = df.sort_index()
     min_year = df.index.year.min()# Calculamos maximos i minimos 
     max_year = df.index.year.max()
     min_date = str(df.index.min().date())
