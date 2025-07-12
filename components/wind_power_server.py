@@ -12,6 +12,9 @@ from utils.wind_rose import (
     create_seasonal_generation_figures,
     create_seasonal_wind_roses_by_speed_plotly,
     create_typical_wind_heatmap,
+    create_monthly_energy_figure,
+    create_generation_heatmap,
+    create_seasonal_generation_figures,
 
 )
 
@@ -168,7 +171,6 @@ def wind_power_server(input, output, session):
         return run_wind_simulation(
             esolmet_df=esolmet,
             turbine_name=modelo,
-            ini_path="configuration.ini",
             wind_turbine_file="wind_simulation/wind-turbines.json",
             wind_inputs_file="wind_simulation/windpower-inputs.json",
             output_csv="wind_simulation/sam_wind.csv",

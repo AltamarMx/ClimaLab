@@ -806,9 +806,8 @@ def create_seasonal_wind_heatmaps(
     return figs
 def make_sam_wind_csv(
     esolmet: pd.DataFrame,
-    ini_path: str = "configuration.ini",
     output_csv: str = "wind_simulation/sam_wind.csv"
-) -> Path:
+):
     """
     Genera un CSV TMY (8760 h) compatible con PySAM usando la configuración
     en 'configuration.ini'. Devuelve la ruta al CSV terminado.
@@ -826,11 +825,12 @@ def make_sam_wind_csv(
         air_pressure_height
     )
     
-    alias = variables.copy()
-    variables = variables.keys()
+    # renombramos todas las columnas de entrada según el dict variables
+    df = esolmet.rename(columns=variables)
 
+    # seleccionamos ya los nombres internos normalizados
     needed_cols = ["ws", "wd", "tdb", "p_atm"]
-    df2 = esolmet[needed_cols].copy()
+    df2 = df[needed_cols].copy()
 
     df2["ws"]    = pd.to_numeric(df2["ws"], errors="coerce")
     df2["wd"]      = pd.to_numeric(df2["wd"],   errors="coerce")
@@ -912,7 +912,6 @@ def make_sam_wind_csv(
 def run_wind_simulation(  #ESTA SI 
     esolmet_df,
     turbine_name: str,
-    ini_path: str = "configuration.ini",
     wind_turbine_file: str = "wind_simulation/wind-turbines.json",
     wind_inputs_file: str = "wind_simulation/windpower-inputs.json",
     output_csv: str = "wind_simulation/sam_wind.csv",
@@ -925,7 +924,6 @@ def run_wind_simulation(  #ESTA SI
     try:
         csv_path = make_sam_wind_csv(
             esolmet_df,
-            ini_path=ini_path,
             output_csv=output_csv,
         )
     except Exception as e:
