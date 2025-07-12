@@ -2,7 +2,7 @@ from shiny import ui
 
 def panel_explorador():
     return ui.nav_panel(
-        "Explorador",
+        "Explorador con pull",
         ui.input_date_range(
             "fechas",
             "Fechas:",
