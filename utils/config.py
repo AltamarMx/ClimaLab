@@ -41,3 +41,9 @@ drop_outliers = True
 
 # Database name
 db_name = 'ClimaLab.db'
+site_id = 2226728
+data_tz = -6 
+# — Alturas de medición (en metros) para cada variable —
+wind_speed_height       = 50 
+air_temperature_height  = 50
+air_pressure_height     = 50

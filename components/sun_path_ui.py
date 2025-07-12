@@ -17,7 +17,7 @@ sun_path_ui = ui.page_fluid(
             ui.input_numeric("lat", "Latitud:", value=latitude,update_on='blur'),
             ui.tags.small('Norte=Positivo, Sur=Negativo',style='color:gray;')),
             ui.div(
-            ui.input_numeric("lon", "Longitud:", value=longitude,update_on='blur'),
+            ui.input_numeric("lon", "Longitud:", value=longitude, update_on='blur'), 
             ui.tags.small('Este=Positivo, Oeste=Negativo',style='color: gray;')),
             ui.input_select("timezone", "Zona horaria:", zonas_horarias, selected="America/Mexico_City"),
             ui.input_radio_buttons("horario", "Horario:", {
