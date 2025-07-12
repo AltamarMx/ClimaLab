@@ -35,7 +35,7 @@ alias_map = variables.copy()
 variables = variables.keys()
 
 
-# importamos
+# importamos de nuevo
 conn = duckdb.connect(database=db_name)
 
 # Leemos la tabla 'lecturas' y hacemos el df
