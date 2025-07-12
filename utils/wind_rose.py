@@ -937,11 +937,15 @@ def run_wind_simulation(  #ESTA SI
             print(sam_data) 
     except FileNotFoundError:
         return {"error": f"No se encontró el archivo '{wind_inputs_file}'"}
-
+    
     for key, val in sam_data.items():
-        if key != "wind_resource_filename":
+        if key == "wind_resource_filename":
+            continue
+        try:
             wind.value(key, val)
-            print(key)
+        except AttributeError:
+            print(f"Variable '{key}' not recognized by PySAM.Windpower, skipping")
+
 
     wind.value("wind_resource_filename", str(csv_path))
     wind.value("wind_resource_shear", 0.14)
