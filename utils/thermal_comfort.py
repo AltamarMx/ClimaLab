@@ -14,7 +14,7 @@ from utils.config import db_name
 
 
 # Esto extrae el dataframe que se utilizara todas las funciones 
-con = duckdb.connect(db_name)
+con = duckdb.connect(db_name,read_only=True)
 df = con.execute("SELECT * FROM lecturas").fetchdf()
 con.close()
 

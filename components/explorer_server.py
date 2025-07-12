@@ -15,7 +15,7 @@ def explorer_server(input, output, session):
         return plot_explorer_matplotlib()
 
     def _query_df(fechas):
-        con = duckdb.connect(db_name)
+        con = duckdb.connect(db_name,read_only=True)
         q = f"""
         SELECT *
           FROM lecturas

@@ -30,7 +30,7 @@ def panel_confort():
 
 def panel_eolica():
     
-    conn = duckdb.connect(database=db_name)
+    conn = duckdb.connect(database=db_name,read_only=True)
     df_lect = conn.execute(
         "SELECT date, variable, value FROM lecturas"
     ).df()

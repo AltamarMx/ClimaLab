@@ -3,7 +3,7 @@ import pandas as pd
 import duckdb
 from utils.config import db_name
 
-con = duckdb.connect(db_name)
+con = duckdb.connect(db_name,read_only=True)
 df = con.execute("SELECT * FROM lecturas").fetchdf()
 con.close()
 

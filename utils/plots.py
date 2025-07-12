@@ -32,7 +32,7 @@ import plotly.graph_objects as go
 def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
 
     # 1) No es necesario usar alias; las columnas ya tienen nombres universales
-    con = duckdb.connect(db_path)
+    con = duckdb.connect(db_path,read_only=True)
     
     # 2) Carga y pivoteo
     query = f"""
@@ -458,7 +458,7 @@ def plot_cleaned_radiation(df: pd.DataFrame) -> go.Figure:
 def plot_explorer_matplotlib(fechas, alias_dict=None):
 
     # 1) No es necesario usar alias; las columnas ya tienen nombres universales
-    con = duckdb.connect(db_name)
+    con = duckdb.connect(db_name, read_only=True)
 
     # 2) Carga y pivoteo
     query = f"""

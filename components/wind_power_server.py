@@ -36,7 +36,7 @@ variables = variables.keys()
 
 
 # importamos de nuevo
-conn = duckdb.connect(database=db_name)
+conn = duckdb.connect(database=db_name,read_only=True)
 
 # Leemos la tabla 'lecturas' y hacemos el df
 df_lect = conn.execute(
