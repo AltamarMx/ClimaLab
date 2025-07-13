@@ -5,10 +5,21 @@ import io
 
 
 def sun_path_server(input, output, session):
+    DAYS = [
+        '2025-01-21', '2025-02-21', '2025-03-21',
+        '2025-04-21', '2025-05-21', '2025-06-21', '2025-12-21'
+    ]
+
     @reactive.calc
     def datos():
         usar_hora_solar = input.horario() == "solar"
-        return calcular_posicion_solar(input.lat(), input.lon(), tz=input.timezone(), usar_hora_solar=usar_hora_solar)
+        return calcular_posicion_solar(
+            input.lat(),
+            input.lon(),
+            tz=input.timezone(),
+            usar_hora_solar=usar_hora_solar,
+            fechas=DAYS,
+        )
 
     @output
     @render_widget
