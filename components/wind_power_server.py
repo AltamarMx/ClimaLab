@@ -31,8 +31,8 @@ from utils.config import ( variables,
                           site_id, 
                           data_tz
 )
-alias_map = variables.copy()
-variables = variables.keys()
+
+# variables = variables.keys()
 
 
 # importamos de nuevo
@@ -45,7 +45,6 @@ df_lect = conn.execute(
 
 # Pivotamos para obtener el DataFrame ancho índice = fecha, columnas = variable
 esolmet = df_lect.pivot(index="date", columns="variable", values="value")
-esolmet = esolmet.rename(columns=alias_map)
 esolmet.index = pd.to_datetime(esolmet.index)
 esolmet = esolmet.sort_index()
 # print(">>> Columnas en esolmet:", list(esolmet.columns))
