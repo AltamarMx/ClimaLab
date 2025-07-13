@@ -1,5 +1,5 @@
 from shiny import App, ui, render, reactive
-from shinywidgets import output_widget, render_widget
+from shinywidgets import output_widget
 from utils.sun_path import obtener_zonas_horarias_gmt
 from utils.config import latitude, longitude, gmt
 gmt_default =  gmt
@@ -33,7 +33,7 @@ sun_path_ui = ui.page_fluid(
             # ui.input_checkbox("ver_tabla_check", "Mostrar tabla de datos", False),
             ui.download_button("descargar_datos", "📥 Descargar datos")
         ),
-        ui.output_ui("grafico_activo")
+        output_widget("grafico_activo")
     ),
     # ui.div(
     # )
