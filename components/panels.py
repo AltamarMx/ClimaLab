@@ -100,13 +100,13 @@ def panel_eolica():
 
                 # Rosa estacional
                 ui.h3("Rosa de viento promedio estacional"),
-                ui.input_slider(
-                    "season_year_range",
-                    "Selecciona rango de años:",
-                    min=min_year,
-                    max=max_year,
-                    value=(max_year, max_year),
-                    step=1
+                ui.input_date_range(
+                    "season_date_range",
+                    "Selecciona periodo:",
+                    start=start_last_year,
+                    end=max_date,
+                    min=min_date,
+                    max=max_date,
                 ),
                 ui.input_task_button(
                     "run_wind_seasonal",
