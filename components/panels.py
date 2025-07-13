@@ -48,7 +48,7 @@ def panel_eolica():
                 "Rosas de Viento",
                 ui.h3(" "),
                 # Rosa promedio anual
-                ui.h3("Rosas de viento promedio anual"),
+                ui.h3("Rosas de viento promedio"),
                 ui.input_date_range(
                     "wind_date_range",
                     "Selecciona periodo:",
