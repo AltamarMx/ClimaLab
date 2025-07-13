@@ -89,7 +89,17 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
                 showlegend=False
             ))
 
-    for date_str in ['2025-03-21', '2025-06-21', '2025-12-21']:
+    for date_str in [
+    '2025-01-21',  # δ ≈ –20°
+    '2025-02-21',  # δ ≈ –11°
+    '2025-03-21',  # δ ≈   0°  (equinoccio)
+    '2025-04-21',  # δ ≈ +11°
+    '2025-05-21',  # δ ≈ +20°
+    '2025-06-21',  # δ =  +23.45° (solsticio de verano)
+    '2025-12-21',  # δ =  –23.45° (solsticio de invierno)
+    ]:
+    # tu código para calcular/plotear la trayectoria
+
         date = pd.to_datetime(date_str)
         times = pd.date_range(date, date + pd.Timedelta('24h'), freq='5min', tz=tz)
         sol_curve = solarposition.get_solarposition(times, lat, lon)
@@ -99,13 +109,13 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
             x=sol_curve['azimuth'],
             y=sol_curve['apparent_elevation'],
             mode='lines',
-            name=date_str
+            # name=date_str
         ))
 
     fig.update_layout(
-        width=1000,
-        height=700,
-        title='Posición Solar (Elevación vs Azimut)',
+        # width=1000,
+        # height=700,
+        # title='Posición Solar (Elevación vs Azimut)',
         xaxis_title='Azimutal (grados)',
         yaxis_title='Elevación solar (grados)',
         legend=dict(
