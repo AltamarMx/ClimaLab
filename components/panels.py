@@ -47,26 +47,7 @@ def panel_eolica():
             ui.nav_panel(
                 "Rosas de Viento",
                 ui.h3(" "),
-                ui.input_date_range(
-                    "wind_period_range",
-                    "Selecciona periodo:",
-                    start=min_date, end=max_date,
-                    min=min_date,   max=max_date
-                ),
-          ui.row(
-            ui.column(
-              6,
-              ui.h4("Rosa diurna", style="text-align:center;"),
-              output_widget("wind_rose_day")
-            ),
-            ui.column(
-              6,
-              ui.h4("Rosa nocturna", style="text-align:center;"),
-              output_widget("wind_rose_night")
-            ),
-          ),
-
-                # Rosa por periodo
+                # Rosa promedio anual
                 ui.h3("Rosas de viento promedio anual"),
                 ui.input_date_range(
                     "wind_date_range",
@@ -76,8 +57,39 @@ def panel_eolica():
                     min=min_date,    # límite mínimo seleccionable
                     max=max_date     # límite máximo seleccionable
                 ),
+                ui.input_task_button(
+                    "run_wind_annual",
+                    "Actualizar",
+                    class_="mb-3"
+                ),
                 output_widget("wind_rose_speed_period"),
 
+                # Rosa diurna/nocturna
+                ui.input_date_range(
+                    "wind_period_range",
+                    "Selecciona periodo:",
+                    start=min_date, end=max_date,
+                    min=min_date,   max=max_date
+                ),
+                ui.input_task_button(
+                    "run_wind_daynight",
+                    "Actualizar",
+                    class_="mb-3"
+                ),
+                ui.row(
+                    ui.column(
+                        6,
+                        ui.h4("Rosa diurna", style="text-align:center;"),
+                        output_widget("wind_rose_day")
+                    ),
+                    ui.column(
+                        6,
+                        ui.h4("Rosa nocturna", style="text-align:center;"),
+                        output_widget("wind_rose_night")
+                    ),
+                ),
+
+                # Rosa estacional
                 ui.h3("Rosa de viento promedio estacional"),
                 ui.input_slider(
                     "season_year_range",
@@ -86,6 +98,11 @@ def panel_eolica():
                     max=max_year,
                     value=(min_year, max_year),
                     step=1
+                ),
+                ui.input_task_button(
+                    "run_wind_seasonal",
+                    "Actualizar",
+                    class_="mb-3"
                 ),
 
                 ui.div(

@@ -65,21 +65,24 @@ def wind_power_server(input, output, session):
 
     @render_widget
     def wind_rose_day():
-        start, end = input.wind_period_range()
+        input.run_wind_daynight()
+        with reactive.isolate():
+            start, end = input.wind_period_range()
         return create_wind_rose_by_speed_day(
             esolmet,
             dir_col="wd",
             speed_col="ws",
             dir_bins=16,
-            speed_bins=None,   
+            speed_bins=None,
             start=start,
             end=end,
         )
 
     @render_widget
     def wind_rose_night():
-
-        start, end = input.wind_period_range()
+        input.run_wind_daynight()
+        with reactive.isolate():
+            start, end = input.wind_period_range()
         return create_wind_rose_by_speed_night(
             esolmet,
             dir_col="wd",
@@ -93,38 +96,40 @@ def wind_power_server(input, output, session):
 
     @render_widget
     def wind_rose_speed_period():
-        start_date, end_date = input.wind_date_range()
+        input.run_wind_annual()
+        with reactive.isolate():
+            start_date, end_date = input.wind_date_range()
         return create_wind_rose_by_speed_period(
             esolmet, dir_col='wd', speed_col='ws',
             start=start_date, end=end_date
         )
 
+    @reactive.Calc
+    def _seasonal_figs():
+        input.run_wind_seasonal()
+        with reactive.isolate():
+            start_year, end_year = input.season_year_range()
+        df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
+        return create_seasonal_wind_roses_by_speed_plotly(df)
+
     @render_widget
     def rose_spring():
-        start_year, end_year = input.season_year_range()
-        df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
-        figs = create_seasonal_wind_roses_by_speed_plotly(df)
+        figs = _seasonal_figs()
         return figs["Primavera"]
 
     @render_widget
     def rose_summer():
-        start_year, end_year = input.season_year_range()
-        df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
-        figs = create_seasonal_wind_roses_by_speed_plotly(df)
+        figs = _seasonal_figs()
         return figs["Verano"]
 
     @render_widget
     def rose_autumn():
-        start_year, end_year = input.season_year_range()
-        df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
-        figs = create_seasonal_wind_roses_by_speed_plotly(df)
+        figs = _seasonal_figs()
         return figs["Otoño"]
 
     @render_widget
     def rose_winter():
-        start_year, end_year = input.season_year_range()
-        df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
-        figs = create_seasonal_wind_roses_by_speed_plotly(df)
+        figs = _seasonal_figs()
         return figs["Invierno"]
     
     @output
