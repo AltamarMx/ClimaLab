@@ -33,8 +33,8 @@ sun_path_ui = ui.page_fluid(
             # ui.input_checkbox("ver_tabla_check", "Mostrar tabla de datos", False),
             ui.download_button("descargar_datos", "📥 Descargar datos")
         ),
-        ui.div(
-            ui.output_ui("grafico_activo")
-        )
-    )
+        ui.output_ui("grafico_activo")
+    ),
+    # ui.div(
+    # )
 )

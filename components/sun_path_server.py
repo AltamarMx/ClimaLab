@@ -1,5 +1,5 @@
 from shiny import reactive, render, ui
-from shinywidgets import render_widget
+from shinywidgets import output_widget, render_widget
 from utils.sun_path import calcular_posicion_solar, figura_cartesiana, figura_estereografica
 
 
@@ -46,9 +46,9 @@ def sun_path_server(input, output, session):
     @render.ui
     def grafico_activo():
         if input.tipo_graf() == "Cartesiano":
-            return ui.output_widget("grafico_cartesiano")
+            return output_widget("grafico_cartesiano")
         else:
-            return ui.output_widget("grafico_polar")
+            return output_widget("grafico_polar")
 
     @output
     @render.download(

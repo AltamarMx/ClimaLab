@@ -115,9 +115,10 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
         fig.add_trace(go.Scatter(
             x=sol_curve['azimuth'],
             y=sol_curve['apparent_elevation'],
-            mode='lines',
+            mode='markers',
             name=date.strftime('%Y-%m-%d'),
-            hovertemplate="Azimut: %{x:.1f}°, Elevación: %{y:.1f}°<extra></extra>"
+            hovertemplate="Azimut: %{x:.1f}°, Elevación: %{y:.1f}°<extra></extra>",
+            showlegend=True
         ))
 
     for curva in calcular_analemmas(lat, lon, tz).values():
@@ -136,14 +137,14 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
         # title='Posición Solar (Elevación vs Azimut)',
         xaxis_title='Azimutal (grados)',
         yaxis_title='Elevación solar (grados)',
-        legend=dict(
-            title='Curvas por fecha',
-            orientation='h',
-            yanchor='bottom',
-            y=-0.3,
-            xanchor='center',
-            x=0.5
-        ),
+        # legend=dict(
+        #     title='Curvas por fecha',
+        #     orientation='h',
+        #     yanchor='bottom',
+        #     y=-0.3,
+        #     xanchor='center',
+        #     x=0.5
+        # ),
         template='plotly_white'
     )
 
