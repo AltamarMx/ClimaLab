@@ -35,8 +35,15 @@ def obtener_zonas_horarias_gmt():
 
 
 # Calcula la posición solar, con opción de usar horario solar verdadero
-def calcular_posicion_solar(lat, lon, tz='America/Mexico_City', usar_hora_solar=False):
-    times = pd.date_range('2025-01-01 00:00:00', '2026-01-01', freq='h', tz=tz)
+def calcular_posicion_solar(lat, lon, tz='America/Mexico_City', usar_hora_solar=False, fechas=None):
+    if fechas is None:
+        times = pd.date_range('2025-01-01 00:00:00', '2026-01-01', freq='h', tz=tz)
+    else:
+        times = pd.DatetimeIndex([])
+        for fecha in fechas:
+            fecha = pd.to_datetime(fecha)
+            rango = pd.date_range(fecha, fecha + pd.Timedelta('24h'), freq='h', tz=tz)
+            times = times.append(rango)
     solpos = solarposition.get_solarposition(times, lat, lon)
     solpos = solpos.loc[solpos['apparent_elevation'] > 0, :]
 
@@ -50,6 +57,17 @@ def calcular_posicion_solar(lat, lon, tz='America/Mexico_City', usar_hora_solar=
         solpos['hora_solar_verdadera'] = hora_solar
         solpos['datetime_solar'] = datetime_solar
     return solpos.round(2)
+
+
+def calcular_analemmas(lat, lon, tz='America/Mexico_City', paso='7D'):
+    fechas = pd.date_range('2025-01-01', '2026-01-01', freq=paso, tz=tz)
+    analemmas = {}
+    for hora in range(24):
+        tiempos = fechas + pd.Timedelta(hours=hora)
+        sp = solarposition.get_solarposition(tiempos, lat, lon)
+        sp = sp[sp['apparent_elevation'] > 0]
+        analemmas[hora] = sp
+    return analemmas
 
 #%%
 # Gráfica cartesiana (elevación vs azimut)
@@ -89,8 +107,7 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
                 showlegend=False
             ))
 
-    for date_str in ['2025-03-21', '2025-06-21', '2025-12-21']:
-        date = pd.to_datetime(date_str)
+    for date in sorted(pd.to_datetime(indice.date).unique()):
         times = pd.date_range(date, date + pd.Timedelta('24h'), freq='5min', tz=tz)
         sol_curve = solarposition.get_solarposition(times, lat, lon)
         sol_curve = sol_curve[sol_curve['apparent_elevation'] > 0]
@@ -99,13 +116,24 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
             x=sol_curve['azimuth'],
             y=sol_curve['apparent_elevation'],
             mode='lines',
-            name=date_str
+            name=date.strftime('%Y-%m-%d'),
+            hovertemplate="Azimut: %{x:.1f}°, Elevación: %{y:.1f}°<extra></extra>"
+        ))
+
+    for curva in calcular_analemmas(lat, lon, tz).values():
+        fig.add_trace(go.Scatter(
+            x=curva['azimuth'],
+            y=curva['apparent_elevation'],
+            mode='lines',
+            line=dict(color='lightgray', dash='dot'),
+            showlegend=False,
+            hoverinfo='skip'
         ))
 
     fig.update_layout(
-        width=1000,
-        height=700,
-        title='Posición Solar (Elevación vs Azimut)',
+        # width=1000,
+        # height=700,
+        # title='Posición Solar (Elevación vs Azimut)',
         xaxis_title='Azimutal (grados)',
         yaxis_title='Elevación solar (grados)',
         legend=dict(
@@ -154,7 +182,7 @@ def figura_estereografica(solpos, lat, lon, tz='America/Mexico_City', usar_hora_
     )
 
     lines = []
-    for date in pd.to_datetime(['2025-03-21', '2025-06-21', '2025-12-21']):
+    for date in sorted(pd.to_datetime(indice.date).unique()):
         times_day = pd.date_range(date, date + pd.Timedelta('24h'), freq='5min', tz=tz)
         solpos_day = solarposition.get_solarposition(times_day, lat, lon)
         solpos_day = solpos_day[solpos_day['apparent_elevation'] > 0]
@@ -163,7 +191,18 @@ def figura_estereografica(solpos, lat, lon, tz='America/Mexico_City', usar_hora_
             r=solpos_day.apparent_zenith,
             theta=solpos_day.azimuth,
             mode='lines',
-            name=date.strftime('%Y-%m-%d')
+            name=date.strftime('%Y-%m-%d'),
+            hovertemplate="Azimut: %{theta:.1f}°, Cénit: %{r:.1f}°<extra></extra>"
+        ))
+
+    for curva in calcular_analemmas(lat, lon, tz).values():
+        lines.append(go.Scatterpolar(
+            r=curva.apparent_zenith,
+            theta=curva.azimuth,
+            mode='lines',
+            line=dict(color='lightgray', dash='dot'),
+            showlegend=False,
+            hoverinfo='skip'
         ))
 
     fig = go.Figure(data=[scatter] + lines)
