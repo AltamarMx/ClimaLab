@@ -53,6 +53,11 @@ def panel_eolica():
                     start=min_date, end=max_date,
                     min=min_date,   max=max_date
                 ),
+                ui.input_task_button(
+                    "run_wind_daynight",
+                    "Actualizar",
+                    class_="mb-3"
+                ),
           ui.row(
             ui.column(
               6,
@@ -76,6 +81,11 @@ def panel_eolica():
                     min=min_date,    # límite mínimo seleccionable
                     max=max_date     # límite máximo seleccionable
                 ),
+                ui.input_task_button(
+                    "run_wind_annual",
+                    "Actualizar",
+                    class_="mb-3"
+                ),
                 output_widget("wind_rose_speed_period"),
 
                 ui.h3("Rosa de viento promedio estacional"),
@@ -86,6 +96,11 @@ def panel_eolica():
                     max=max_year,
                     value=(min_year, max_year),
                     step=1
+                ),
+                ui.input_task_button(
+                    "run_wind_seasonal",
+                    "Actualizar",
+                    class_="mb-3"
                 ),
 
                 ui.div(
