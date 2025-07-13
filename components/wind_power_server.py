@@ -65,7 +65,9 @@ def wind_power_server(input, output, session):
 
     @render_widget
     def wind_rose_day():
-        input.run_wind_daynight()
+        n_clicks = input.run_wind_daynight()
+        if n_clicks is None or n_clicks == 0:
+            return None
         with reactive.isolate():
             start, end = input.wind_period_range()
         return create_wind_rose_by_speed_day(
@@ -80,7 +82,9 @@ def wind_power_server(input, output, session):
 
     @render_widget
     def wind_rose_night():
-        input.run_wind_daynight()
+        n_clicks = input.run_wind_daynight()
+        if n_clicks is None or n_clicks == 0:
+            return None
         with reactive.isolate():
             start, end = input.wind_period_range()
         return create_wind_rose_by_speed_night(
@@ -106,7 +110,9 @@ def wind_power_server(input, output, session):
 
     @reactive.Calc
     def _seasonal_figs():
-        input.run_wind_seasonal()
+        n_clicks = input.run_wind_seasonal()
+        if n_clicks is None or n_clicks == 0:
+            return None
         with reactive.isolate():
             start_year, end_year = input.season_year_range()
         df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
@@ -115,21 +121,29 @@ def wind_power_server(input, output, session):
     @render_widget
     def rose_spring():
         figs = _seasonal_figs()
+        if figs is None:
+            return None
         return figs["Primavera"]
 
     @render_widget
     def rose_summer():
         figs = _seasonal_figs()
+        if figs is None:
+            return None
         return figs["Verano"]
 
     @render_widget
     def rose_autumn():
         figs = _seasonal_figs()
+        if figs is None:
+            return None
         return figs["Otoño"]
 
     @render_widget
     def rose_winter():
         figs = _seasonal_figs()
+        if figs is None:
+            return None
         return figs["Invierno"]
     
     @output
