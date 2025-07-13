@@ -24,18 +24,17 @@ sun_path_ui = ui.page_fluid(
                 "civil": "Horario estándar (civil)",
                 "solar": "Horario solar verdadero"
             }, selected="civil"),
-            ui.input_radio_buttons("graficas", "Mostrar:", {
-                "cartesiana": "Solo cartesiana",
-                "polar": "Solo estereográfica",
-                # "ambas": "Ambas gráficas"
-            }, selected="cartesiana"),
+            ui.input_radio_buttons(
+                "tipo_graf",
+                "Tipo de gráfico:",
+                choices=["Cartesiano", "Polar"],
+                selected="Cartesiano",
+            ),
             # ui.input_checkbox("ver_tabla_check", "Mostrar tabla de datos", False),
             ui.download_button("descargar_datos", "📥 Descargar datos")
         ),
         ui.div(
-            output_widget("grafico_cartesiano"),
-            output_widget("grafico_polar"),
-            # ui.output_ui("mostrar_tabla")
+            ui.output_ui("grafico_activo")
         )
     )
 )
