@@ -114,7 +114,13 @@ def wind_power_server(input, output, session):
             return None
         with reactive.isolate():
             start_year, end_year = input.season_year_range()
-        df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
+        max_year = esolmet.index.year.max()
+        if start_year == end_year == max_year:
+            end_date = esolmet.index.max()
+            start_date = end_date - pd.DateOffset(years=1) + pd.Timedelta(days=1)
+            df = esolmet.loc[start_date:end_date]
+        else:
+            df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
         return create_seasonal_wind_roses_by_speed_plotly(df)
 
     @render_widget

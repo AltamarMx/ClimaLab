@@ -101,7 +101,7 @@ def panel_eolica():
                     "Selecciona rango de años:",
                     min=min_year,
                     max=max_year,
-                    value=(min_year, max_year),
+                    value=(max_year, max_year),
                     step=1
                 ),
                 ui.input_task_button(
