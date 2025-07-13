@@ -58,6 +58,17 @@ def calcular_posicion_solar(lat, lon, tz='America/Mexico_City', usar_hora_solar=
         solpos['datetime_solar'] = datetime_solar
     return solpos.round(2)
 
+
+def calcular_analemmas(lat, lon, tz='America/Mexico_City', paso='7D'):
+    fechas = pd.date_range('2025-01-01', '2026-01-01', freq=paso, tz=tz)
+    analemmas = {}
+    for hora in range(24):
+        tiempos = fechas + pd.Timedelta(hours=hora)
+        sp = solarposition.get_solarposition(tiempos, lat, lon)
+        sp = sp[sp['apparent_elevation'] > 0]
+        analemmas[hora] = sp
+    return analemmas
+
 #%%
 # Gráfica cartesiana (elevación vs azimut)
 def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_solar=False):
@@ -107,6 +118,16 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
             mode='lines',
             name=date.strftime('%Y-%m-%d'),
             hovertemplate="Azimut: %{x:.1f}°, Elevación: %{y:.1f}°<extra></extra>"
+        ))
+
+    for curva in calcular_analemmas(lat, lon, tz).values():
+        fig.add_trace(go.Scatter(
+            x=curva['azimuth'],
+            y=curva['apparent_elevation'],
+            mode='lines',
+            line=dict(color='lightgray', dash='dot'),
+            showlegend=False,
+            hoverinfo='skip'
         ))
 
     fig.update_layout(
@@ -172,6 +193,16 @@ def figura_estereografica(solpos, lat, lon, tz='America/Mexico_City', usar_hora_
             mode='lines',
             name=date.strftime('%Y-%m-%d'),
             hovertemplate="Azimut: %{theta:.1f}°, Cénit: %{r:.1f}°<extra></extra>"
+        ))
+
+    for curva in calcular_analemmas(lat, lon, tz).values():
+        lines.append(go.Scatterpolar(
+            r=curva.apparent_zenith,
+            theta=curva.azimuth,
+            mode='lines',
+            line=dict(color='lightgray', dash='dot'),
+            showlegend=False,
+            hoverinfo='skip'
         ))
 
     fig = go.Figure(data=[scatter] + lines)
