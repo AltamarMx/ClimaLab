@@ -88,6 +88,32 @@ def panel_eolica():
                 ),
                 output_widget("wind_rose_speed_period"),
 
+                # Rosa diurna/nocturna
+                ui.input_date_range(
+                    "wind_period_range",
+                    "Selecciona periodo:",
+                    start=min_date, end=max_date,
+                    min=min_date,   max=max_date
+                ),
+                ui.input_task_button(
+                    "run_wind_daynight",
+                    "Actualizar",
+                    class_="mb-3"
+                ),
+                ui.row(
+                    ui.column(
+                        6,
+                        ui.h4("Rosa diurna", style="text-align:center;"),
+                        output_widget("wind_rose_day")
+                    ),
+                    ui.column(
+                        6,
+                        ui.h4("Rosa nocturna", style="text-align:center;"),
+                        output_widget("wind_rose_night")
+                    ),
+                ),
+
+                # Rosa estacional
                 ui.h3("Rosa de viento promedio estacional"),
                 ui.input_slider(
                     "season_year_range",
