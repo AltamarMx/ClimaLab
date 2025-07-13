@@ -35,8 +35,15 @@ def obtener_zonas_horarias_gmt():
 
 
 # Calcula la posición solar, con opción de usar horario solar verdadero
-def calcular_posicion_solar(lat, lon, tz='America/Mexico_City', usar_hora_solar=False):
-    times = pd.date_range('2025-01-01 00:00:00', '2026-01-01', freq='h', tz=tz)
+def calcular_posicion_solar(lat, lon, tz='America/Mexico_City', usar_hora_solar=False, fechas=None):
+    if fechas is None:
+        times = pd.date_range('2025-01-01 00:00:00', '2026-01-01', freq='h', tz=tz)
+    else:
+        times = pd.DatetimeIndex([])
+        for fecha in fechas:
+            fecha = pd.to_datetime(fecha)
+            rango = pd.date_range(fecha, fecha + pd.Timedelta('24h'), freq='h', tz=tz)
+            times = times.append(rango)
     solpos = solarposition.get_solarposition(times, lat, lon)
     solpos = solpos.loc[solpos['apparent_elevation'] > 0, :]
 
@@ -89,18 +96,7 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
                 showlegend=False
             ))
 
-    for date_str in [
-    '2025-01-21',  # δ ≈ –20°
-    '2025-02-21',  # δ ≈ –11°
-    '2025-03-21',  # δ ≈   0°  (equinoccio)
-    '2025-04-21',  # δ ≈ +11°
-    '2025-05-21',  # δ ≈ +20°
-    '2025-06-21',  # δ =  +23.45° (solsticio de verano)
-    '2025-12-21',  # δ =  –23.45° (solsticio de invierno)
-    ]:
-    # tu código para calcular/plotear la trayectoria
-
-        date = pd.to_datetime(date_str)
+    for date in sorted(pd.to_datetime(indice.date).unique()):
         times = pd.date_range(date, date + pd.Timedelta('24h'), freq='5min', tz=tz)
         sol_curve = solarposition.get_solarposition(times, lat, lon)
         sol_curve = sol_curve[sol_curve['apparent_elevation'] > 0]
@@ -109,7 +105,8 @@ def figura_cartesiana(solpos, lat, lon, tz='America/Mexico_City', usar_hora_sola
             x=sol_curve['azimuth'],
             y=sol_curve['apparent_elevation'],
             mode='lines',
-            # name=date_str
+            name=date.strftime('%Y-%m-%d'),
+            hovertemplate="Azimut: %{x:.1f}°, Elevación: %{y:.1f}°<extra></extra>"
         ))
 
     fig.update_layout(
@@ -164,7 +161,7 @@ def figura_estereografica(solpos, lat, lon, tz='America/Mexico_City', usar_hora_
     )
 
     lines = []
-    for date in pd.to_datetime(['2025-03-21', '2025-06-21', '2025-12-21']):
+    for date in sorted(pd.to_datetime(indice.date).unique()):
         times_day = pd.date_range(date, date + pd.Timedelta('24h'), freq='5min', tz=tz)
         solpos_day = solarposition.get_solarposition(times_day, lat, lon)
         solpos_day = solpos_day[solpos_day['apparent_elevation'] > 0]
@@ -173,7 +170,8 @@ def figura_estereografica(solpos, lat, lon, tz='America/Mexico_City', usar_hora_
             r=solpos_day.apparent_zenith,
             theta=solpos_day.azimuth,
             mode='lines',
-            name=date.strftime('%Y-%m-%d')
+            name=date.strftime('%Y-%m-%d'),
+            hovertemplate="Azimut: %{theta:.1f}°, Cénit: %{r:.1f}°<extra></extra>"
         ))
 
     fig = go.Figure(data=[scatter] + lines)
