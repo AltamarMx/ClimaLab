@@ -129,8 +129,10 @@ def panel_eolica():
                 ui.input_date_range(
                     "heatmap_speed_range",
                     "Selecciona periodo:",
-                    start=min_date, end=max_date,
-                    min=min_date,   max=max_date
+                    start=start_last_year,
+                    end=max_date,
+                    min=min_date,
+                    max=max_date,
                 ),
                 ui.row(
                     ui.column(
