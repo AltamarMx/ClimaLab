@@ -42,10 +42,14 @@ def panel_eolica():
     df = df_lect.pivot(index="date", columns="variable", values="value")
     df.index = pd.to_datetime(df.index)
     df = df.sort_index()
-    min_year = df.index.year.min()# Calculamos maximos i minimos 
+    min_year = df.index.year.min()# Calculamos maximos i minimos
     max_year = df.index.year.max()
-    min_date = str(df.index.min().date())
-    max_date = str(df.index.max().date())
+    min_date_dt = df.index.min()
+    max_date_dt = df.index.max()
+    min_date = str(min_date_dt.date())
+    max_date = str(max_date_dt.date())
+    start_last_year_dt = max(max_date_dt - pd.DateOffset(years=1) + pd.Timedelta(days=1), min_date_dt)
+    start_last_year = str(start_last_year_dt.date())
     return ui.nav_panel(
         "Eólica",
         ui.navset_tab(
@@ -57,10 +61,10 @@ def panel_eolica():
                 ui.input_date_range(
                     "wind_date_range",
                     "Selecciona periodo:",
-                    start=min_date,  # fecha de inicio por defecto
-                    end=max_date,    # fecha de fin por defecto
-                    min=min_date,    # límite mínimo seleccionable
-                    max=max_date     # límite máximo seleccionable
+                    start=start_last_year,  # fecha de inicio por defecto
+                    end=max_date,           # fecha de fin por defecto
+                    min=min_date,           # límite mínimo seleccionable
+                    max=max_date            # límite máximo seleccionable
                 ),
                 ui.input_task_button(
                     "run_wind_annual",
@@ -73,7 +77,7 @@ def panel_eolica():
                 ui.input_date_range(
                     "wind_period_range",
                     "Selecciona periodo:",
-                    start=min_date, end=max_date,
+                    start=start_last_year, end=max_date,
                     min=min_date,   max=max_date
                 ),
                 ui.input_task_button(
@@ -96,13 +100,13 @@ def panel_eolica():
 
                 # Rosa estacional
                 ui.h3("Rosa de viento promedio estacional"),
-                ui.input_slider(
-                    "season_year_range",
-                    "Selecciona rango de años:",
-                    min=min_year,
-                    max=max_year,
-                    value=(min_year, max_year),
-                    step=1
+                ui.input_date_range(
+                    "season_date_range",
+                    "Selecciona periodo:",
+                    start=start_last_year,
+                    end=max_date,
+                    min=min_date,
+                    max=max_date,
                 ),
                 ui.input_task_button(
                     "run_wind_seasonal",

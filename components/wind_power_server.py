@@ -31,8 +31,8 @@ from utils.config import ( variables,
                           site_id, 
                           data_tz
 )
-alias_map = variables.copy()
-variables = variables.keys()
+
+# variables = variables.keys()
 
 
 # importamos de nuevo
@@ -45,7 +45,6 @@ df_lect = conn.execute(
 
 # Pivotamos para obtener el DataFrame ancho índice = fecha, columnas = variable
 esolmet = df_lect.pivot(index="date", columns="variable", values="value")
-esolmet = esolmet.rename(columns=alias_map)
 esolmet.index = pd.to_datetime(esolmet.index)
 esolmet = esolmet.sort_index()
 # print(">>> Columnas en esolmet:", list(esolmet.columns))
@@ -114,8 +113,16 @@ def wind_power_server(input, output, session):
         if n_clicks is None or n_clicks == 0:
             return None
         with reactive.isolate():
-            start_year, end_year = input.season_year_range()
-        df = esolmet.loc[f"{start_year}-01-01": f"{end_year}-12-31"]
+            start_date_str, end_date_str = input.season_date_range()
+        max_date = esolmet.index.max()
+        min_date = esolmet.index.min()
+        start_last_year = max(max_date - pd.DateOffset(years=1) + pd.Timedelta(days=1), min_date)
+        start_date = pd.to_datetime(start_date_str)
+        end_date = pd.to_datetime(end_date_str)
+        if start_date == start_last_year and end_date == max_date:
+            df = esolmet.loc[start_last_year:end_date]
+        else:
+            df = esolmet.loc[start_date:end_date]
         return create_seasonal_wind_roses_by_speed_plotly(df)
 
     @render_widget

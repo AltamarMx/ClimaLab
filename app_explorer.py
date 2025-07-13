@@ -51,10 +51,10 @@ app_ui = ui.page_fillable(
 
 def server(input, output, session):
 
-    explorer_server(input,output,session)
-    sun_path_server(input, output, session)
-    pv_calc_server(input, output, session)
-    thermal_comfort_server(input, output, session)
+    # [explorer_server(input,output,session)
+    # sun_path_server(input, output, session)
+    # pv_calc_server(input, output, session)
+    # thermal_comfort_server(input, output, session)
     wind_power_server(input, output, session)
 
 
