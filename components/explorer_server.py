@@ -2,6 +2,8 @@
 from shiny import App, ui, render
 import shinyswatch
 import duckdb
+import io
+from utils.config import db_name
 from utils.plots import plot_explorer_matplotlib
 
 
