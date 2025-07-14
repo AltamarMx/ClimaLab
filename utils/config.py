@@ -32,6 +32,7 @@ longitude = -99
 gmt = -6
 name = 'ClimaLab'
 min_year = 2001
+mean_year = 2025
 
 # Solar constant in W/m² used for irradiance quality checks
 solar_constant = 1361
@@ -41,6 +42,7 @@ drop_outliers = True
 
 # Database name
 db_name = 'ClimaLab.db'
+mean_year_name = 'database/mean-year.parquet'
 site_id = 2226728
 data_tz = -6 
 # — Alturas de medición (en metros) para cada variable —

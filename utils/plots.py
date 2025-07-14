@@ -715,3 +715,54 @@ def plot_explorer_matplotlib(fechas, alias_dict=None):
 
 
     return fig
+
+
+def plot_mean_year_plotly():
+    
+
+    # %%
+    df = pd.read_parquet('./database/mean-year.parquet')
+
+
+    # 1) Cálculo diario (igual que antes)
+    daily = df['tdb_mean'].resample('D').agg(['min','max','mean'])
+    daily['range'] = daily['max'] - daily['min']
+
+    # 2) Figura única
+    fig = go.Figure()
+
+    # Barra “range” (min→max)
+    fig.add_trace(go.Bar(
+        x=daily.index,
+        y=daily['range'],
+        base=daily['min'],
+        marker=dict(color='rgba(255,0,0,0.2)'),
+        showlegend=False,
+        hovertemplate='Min: %{base:.2f}°C<br>Max: %{base + y:.2f}°C<extra></extra>'
+    ))
+
+    # Línea de promedio diario
+    fig.add_trace(go.Scatter(
+        x=daily.index,
+        y=daily['mean'],
+        mode='lines',
+        line=dict(color='red', width=1),
+        name='Promedio diario',
+        hovertemplate='Promedio: %{y:.2f}°C<extra></extra>'
+    ))
+
+    # 3) Layout con range slider
+    fig.update_layout(
+        title='Dry bulb temperature: rango diario + promedio',
+        xaxis=dict(
+            title='Fecha',
+            type='date',
+            tickangle=45,
+            rangeslider=dict(visible=True),
+        ),
+        yaxis=dict(title='Dry bulb temperature (°C)'),
+        margin=dict(t=60, b=100),
+        hovermode='x unified'
+    )
+
+    return fig

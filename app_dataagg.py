@@ -1,5 +1,6 @@
 import os
 import duckdb
+import pandas as pd
 import io
 from numpy import nan
 from shiny import App, Inputs, Outputs, Session, render, ui, req, reactive
@@ -7,7 +8,7 @@ import faicons as fa
 
 from utils.data_processing import load_csv, run_tests, clean_outliers
 from utils.plots import plot_missingno, plot_all
-from utils.config import name, drop_outliers, db_name
+from utils.config import name, drop_outliers, db_name, mean_year_name, mean_year
 from components.panels import (
     panel_upload_file,
     panel_clean_outliers,
@@ -276,6 +277,58 @@ def server(input: Inputs, output: Outputs, session: Session):
             ui.tags.tbody(*rows),
             class_="table table-sm table-striped w-auto",
         )
+
+
+    @output
+    @render.ui
+    @reactive.event(input.mean_year)
+    async def create_mean_year():
+        print('hola')
+        
+        con = duckdb.connect('./climalab.db', read_only=True)
+
+        # 1) Carga  df, cierra db y pivoteo
+        query = f"""
+        SELECT *
+        FROM lecturas
+        ORDER BY date
+        """
+        df = con.execute(query).fetchdf()
+        con.close()
+        df = df.pivot(index="date", columns="variable", values="value")
+        
+        # 2) (Opcional) Elimina el 29-Feb para evitar que años bisiestos distorsionen:
+        df = df[~((df.index.month == 2) & (df.index.day == 29))]
+            
+        # 3) Genera las claves de agrupamiento
+        keys = [
+            df.index.month,      # 1–12
+            df.index.day,        # 1–31
+            df.index.hour,       # 0–23
+            df.index.minute      # 0–59
+        ]
+        average_year = df.groupby(keys).mean().copy()
+        
+        # 4) Reconstruye un índice datetime genérico
+        #    Convertimos el índice multinivel a DataFrame...
+        idx = average_year.index.to_frame(index=False, name=['month','day','hour','minute'])
+        #    y creamos fechas eligiendo un año arbitrario:
+        typical_dates = pd.to_datetime({
+            'year': mean_year,
+            'month': idx['month'],
+            'day':   idx['day'],
+            'hour':  idx['hour'],
+            'minute':idx['minute']
+        })
+        
+        # 5) Asigna ese nuevo índice y ordena
+        average_year.index = typical_dates
+        average_year = average_year.sort_index()
+
+        # Ahora `yearly_typical` es un DataFrame con un año “promedio”:
+        average_year.to_parquet(mean_year_name)
+        return ui.tags.p(f"✅ Año promedio guardado en {mean_year_name}")
+
 
 
 # instantiate app

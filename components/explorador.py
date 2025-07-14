@@ -2,6 +2,9 @@ from shiny import ui
 import duckdb
 import pandas as pd
 from utils.config import db_name
+from utils.config import mean_year_name
+from shinywidgets import output_widget
+
 
 def panel_explorador():
     conn = duckdb.connect(database=db_name, read_only=True)
@@ -18,7 +21,7 @@ def panel_explorador():
     )
 
     return ui.nav_panel(
-        "Explorador con pull",
+        "Explorador",
         ui.input_date_range(
             "fechas",
             "Fechas:",
@@ -47,4 +50,5 @@ def panel_explorador():
 def panel_estadistica():
     return ui.nav_panel(
         "Estadística",
-        "Aquí irá tu contenido estadístico"    )
+        output_widget("plot_mean_year"),
+    )
