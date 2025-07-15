@@ -19,7 +19,12 @@ def panel_explorador():
         max_date_dt - pd.DateOffset(days=120) + pd.Timedelta(days=1),
         min_date_dt,
     )
-
+    
+    # Texto informativo (puedes cambiar h6→p, span, etc.)
+    info_rango = ui.h6(
+        f"Datos disponibles de {min_date_dt.date()} al {max_date_dt.date()}",
+        class_="text-muted mb-2 text-center"   # opcional: gris y peque-ño margen inferior
+    )
     return ui.nav_panel(
         "Explorador",
         ui.input_date_range(
@@ -32,6 +37,9 @@ def panel_explorador():
             language="es",
             separator="a",
         ),
+        ui.hr(),
+        info_rango,
+        ui.hr(),
         ui.output_plot("plot_explorer"),
         ui.div(
             ui.download_button(
