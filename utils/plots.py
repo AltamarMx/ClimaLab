@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 
 from utils.data_processing import load_csv, radiacion
 from utils.config import variables
-from utils.config import db_name
+from utils.config import db_name, mean_year_name
 
 import missingno as msno
 import matplotlib
@@ -721,7 +721,8 @@ def plot_mean_year_plotly():
     
 
     # %%
-    df = pd.read_parquet('./database/mean-year.parquet')
+    df = pd.read_parquet(mean_year_name)
+    print(df)
 
 
     # 1) Cálculo diario (igual que antes)
