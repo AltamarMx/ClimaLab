@@ -16,7 +16,7 @@ def panel_explorador():
     min_date_dt = pd.to_datetime(min_date)
     max_date_dt = pd.to_datetime(max_date)
     start_last_year_dt = max(
-        max_date_dt - pd.DateOffset(years=1) + pd.Timedelta(days=1),
+        max_date_dt - pd.DateOffset(days=120) + pd.Timedelta(days=1),
         min_date_dt,
     )
 
