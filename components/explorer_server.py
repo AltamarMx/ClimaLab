@@ -4,7 +4,10 @@ import shinyswatch
 import duckdb
 import io
 from utils.config import db_name
-from utils.plots import plot_explorer_matplotlib
+from utils.plots import plot_explorer_matplotlib, plot_mean_year_plotly
+from shinywidgets import render_plotly
+from shinywidgets import output_widget, render_widget  
+
 
 
 def explorer_server(input, output, session):
@@ -35,7 +38,7 @@ def explorer_server(input, output, session):
         fechas = input.fechas()
         if fechas is None:
             return
-        df = _query_df(fechas)
+        df = _query_df(fechas) 
         with io.BytesIO() as buf:
             df.to_parquet(buf, index=True, engine="pyarrow")
             buf.seek(0)
@@ -52,4 +55,9 @@ def explorer_server(input, output, session):
             df.to_csv(buf, index=True)
             buf.seek(0)
             yield buf.getvalue()
+    
+    @output
+    @render_plotly
+    def plot_mean_year():
+        return plot_mean_year_plotly()
 

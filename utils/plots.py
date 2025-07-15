@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 
 from utils.data_processing import load_csv, radiacion
 from utils.config import variables
-from utils.config import db_name
+from utils.config import db_name, mean_year_name
 
 import missingno as msno
 import matplotlib
@@ -713,5 +713,58 @@ def plot_explorer_matplotlib(fechas, alias_dict=None):
         # 6) Formato de fecha en eje X
         fig.autofmt_xdate()
 
+
+    return fig
+
+
+def plot_mean_year_plotly():
+    
+
+    # %%
+    df = pd.read_parquet(mean_year_name)
+    
+
+    # 1) Cálculo diario (igual que antes)
+    daily = df['tdb_mean'].resample('D').agg(['min','max','mean'])
+    daily['range'] = daily['max'] - daily['min']
+    daily = daily.reset_index().rename(columns={"index": "date"})
+    daily.date = daily.date.astype('object')
+    # 2) Figura única
+    fig = go.Figure()
+
+    # Barra “range” (min→max)
+    fig.add_trace(go.Bar(
+        x=daily['date'],
+        y=daily['range'],
+        base=daily['min'],
+        marker=dict(color='rgba(255,0,0,0.2)'),
+        showlegend=False,
+        hovertemplate='Min: %{base:.2f}°C<br>Max: %{base + y:.2f}°C<extra></extra>'
+    ))
+
+    # Línea de promedio diario
+    fig.add_trace(go.Scatter(
+        x=daily['date'],
+        y=daily['mean'],
+        mode='lines',
+        line=dict(color='red', width=1),
+        name=None,
+        hovertemplate='Promedio: %{y:.2f}°C<extra></extra>'
+    ))
+
+    # 3) Layout con range slider
+    fig.update_layout(
+        title='Temperatura diaria promedio y  diarios maximos y minimos',
+        xaxis=dict(
+            title='Fecha',
+            type='date',
+            # tickangle=45,
+            rangeslider=dict(visible=True),
+        ),
+        yaxis=dict(title='Temperatura  (°C)'),
+        margin=dict(t=60, b=100),
+        hovermode='x unified'
+    )
+    # fig.show()
 
     return fig

@@ -12,10 +12,6 @@ import duckdb
 
 
 
-def panel_estadistica():
-    return ui.nav_panel("Estadística", "Aquí irá tu contenido estadístico")
-
-
 def panel_trayectoriasolar():
     return ui.nav_panel(
         "SunPath",
@@ -401,7 +397,7 @@ def panel_load_database():
 
 def panel_admin_database():
     return ui.nav_panel(
-        "Export database",
+        "Admin database",
         ui.card(
             ui.card_header("Upload & Export"),
             ui.card_body(
@@ -414,6 +410,13 @@ def panel_admin_database():
                             icon=fa.icon_svg("file-export"),
                             class_="btn btn-outline-success w-100 mb-2",
                         ),
+                        ui.input_action_button(
+                            "mean_year",
+                            "Create mean year",
+                            icon=fa.icon_svg("file-export"),
+                            class_="btn btn-outline-success w-100 mb-2",
+                        ),
+                        ui.output_ui("create_mean_year"),
                         class_="d-flex flex-column align-items-end",
                         style="min-width: 200px;",
                     ),
