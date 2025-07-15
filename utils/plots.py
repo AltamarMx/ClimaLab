@@ -734,7 +734,7 @@ def plot_mean_year_plotly():
 
     # Barra “range” (min→max)
     fig.add_trace(go.Bar(
-        x=daily.index,
+        x=daily['date'],
         y=daily['range'],
         base=daily['min'],
         marker=dict(color='rgba(255,0,0,0.2)'),
