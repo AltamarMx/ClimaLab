@@ -726,16 +726,15 @@ def plot_mean_year_plotly():
 
 
     # 1) Cálculo diario (igual que antes)
-    daily = df['tdb_mean'].resample('D').agg(['min', 'max', 'mean'])
+    daily = df['tdb_mean'].resample('D').agg(['min','max','mean'])
     daily['range'] = daily['max'] - daily['min']
-    daily = daily.reset_index().rename(columns={"index": "date"})
 
     # 2) Figura única
     fig = go.Figure()
 
     # Barra “range” (min→max)
     fig.add_trace(go.Bar(
-        x=daily["date"],
+        x=daily.index,
         y=daily['range'],
         base=daily['min'],
         marker=dict(color='rgba(255,0,0,0.2)'),
@@ -745,7 +744,7 @@ def plot_mean_year_plotly():
 
     # Línea de promedio diario
     fig.add_trace(go.Scatter(
-        x=daily["date"],
+        x=daily.index,
         y=daily['mean'],
         mode='lines',
         line=dict(color='red', width=1),
