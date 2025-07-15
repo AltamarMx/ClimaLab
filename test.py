@@ -4,7 +4,6 @@ import duckdb
 from utils.config import mean_year
 
 # %%
-# 1) Conexión y pivoteo igual que antes
 con = duckdb.connect('./climalab.db', read_only=True)
 query = "SELECT * FROM lecturas ORDER BY date"
 df = con.execute(query).fetchdf().pivot(index="date", columns="variable", values="value")
@@ -41,7 +40,7 @@ typical_dates = pd.to_datetime({
 })
 stats.index = typical_dates
 stats = stats.sort_index()
-
+stats.to_parquet('./database/mean-year.parquet')
 # %%
 
 
@@ -60,7 +59,7 @@ ax.fill_between(stats.index,
                 color='C0', alpha=0.3,
                 label='GHI min–max anual')
 ax.plot(
-        stats['tdb_mean'].resample('D').mean(),
+        stats['tdb_mean'] ,
         color='C0',
         label='GHI promedio anual')
 ax.set_ylabel('GHI [W/m²]')

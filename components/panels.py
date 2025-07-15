@@ -12,10 +12,6 @@ import duckdb
 
 
 
-def panel_estadistica():
-    return ui.nav_panel("Estadística", "Aquí irá tu contenido estadístico")
-
-
 def panel_trayectoriasolar():
     return ui.nav_panel(
         "SunPath",

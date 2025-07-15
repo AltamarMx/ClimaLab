@@ -57,7 +57,7 @@ def explorer_server(input, output, session):
             yield buf.getvalue()
     
     @output
-    @render_widget
+    @render_plotly
     def plot_mean_year():
         return plot_mean_year_plotly()
 

@@ -7,15 +7,19 @@ from plotly.subplots import make_subplots
 
 # %%
 df = pd.read_parquet('./database/mean-year.parquet')
-df
-
+df.info()
 # %%
+
 
 
 # 1) Cálculo diario (igual que antes)
 daily = df['tdb_mean'].resample('D').agg(['min','max','mean'])
 daily['range'] = daily['max'] - daily['min']
-
+print(daily)
+daily.reset_index(inplace=True)
+print(daily)
+daily['index']
+# %%
 # 2) Figura única
 fig = go.Figure()
 
