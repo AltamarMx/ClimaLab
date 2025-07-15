@@ -725,17 +725,21 @@ def plot_mean_year_plotly():
     
 
     # 1) Cálculo diario (igual que antes)
-    daily = df['tdb_mean'].resample('D').agg(['min','max','mean'])
+    daily = df['tdb_mean'].resample('D').agg(['min', 'max', 'mean'])
     daily['range'] = daily['max'] - daily['min']
-    daily.reset_index(inplace=True)
-    print(daily.info())
+    daily = daily.reset_index().rename(columns={"index": "date"})
+    daily.date = daily.date.astype('object')
+
+
+    # print(daily.info())
+    # print(daily)
 
     # 2) Figura única
     fig = go.Figure()
 
     # Barra “range” (min→max)
     fig.add_trace(go.Bar(
-        x=daily['index'],
+        x=daily["date"],
         y=daily['range'],
         base=daily['min'],
         marker=dict(color='rgba(255,0,0,0.2)'),
@@ -744,25 +748,25 @@ def plot_mean_year_plotly():
     ))
 
     # Línea de promedio diario
-    # fig.add_trace(go.Scatter(
-    #     x=daily['index'],
-    #     y=daily['mean'],
-    #     mode='lines',
-    #     line=dict(color='red', width=1),
-    #     name='Promedio diario',
-    #     hovertemplate='Promedio: %{y:.2f}°C<extra></extra>'
-    # ))
+    fig.add_trace(go.Scatter(
+        x=daily['date'],
+        y=daily['mean'],
+        mode='lines',
+        line=dict(color='red', width=1),
+        name=None,
+        hovertemplate='Promedio: %{y:.2f}°C<extra></extra>'
+    ))
 
     # 3) Layout con range slider
     fig.update_layout(
-        title='Dry bulb temperature: rango diario + promedio',
+        title='Temperatura diaria promedio y  diarios maximos y minimos',
         xaxis=dict(
             title='Fecha',
             type='date',
-            tickangle=45,
+            # tickangle=45,
             rangeslider=dict(visible=True),
         ),
-        yaxis=dict(title='Dry bulb temperature (°C)'),
+        yaxis=dict(title='Temperatura  (°C)'),
         margin=dict(t=60, b=100),
         hovermode='x unified'
     )
