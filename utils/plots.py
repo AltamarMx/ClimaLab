@@ -29,6 +29,19 @@ import plotly.graph_objects as go
 # register_plotly_resampler(mode="widget")
 
 
+_mean_year_daily = None
+_mean_year_fig = None
+
+
+def _get_mean_year_daily():
+    """Load and cache daily aggregates of ``tdb_mean``."""
+    global _mean_year_daily
+    if _mean_year_daily is None:
+        df = pd.read_parquet(mean_year_name, columns=["tdb_mean"])
+        _mean_year_daily = df["tdb_mean"].resample("D").agg(["min", "max", "mean"])
+    return _mean_year_daily
+
+
 def graph_all_matplotlib(fechas, alias_dict=None,db_path=db_name):
 
     # 1) No es necesario usar alias; las columnas ya tienen nombres universales
@@ -718,18 +731,16 @@ def plot_explorer_matplotlib(fechas, alias_dict=None):
 
 
 def plot_mean_year_plotly():
-    
+    """Return a Plotly figure of mean daily temperatures."""
+    global _mean_year_fig
+    if _mean_year_fig is not None:
+        return _mean_year_fig
 
-    # %%
-    df = pd.read_parquet(mean_year_name)
-    
-
-    # 1) Cálculo diario (igual que antes)
-    daily = df['tdb_mean'].resample('D').agg(['min','max','mean'])
-    daily['range'] = daily['max'] - daily['min']
+    daily = _get_mean_year_daily().copy()
+    daily["range"] = daily["max"] - daily["min"]
     daily = daily.reset_index().rename(columns={"index": "date"})
-    daily.date = daily.date.astype('object')
-    # 2) Figura única
+    daily["date"] = daily["date"].astype("object")
+
     fig = go.Figure()
 
     # Barra “range” (min→max)
@@ -765,6 +776,6 @@ def plot_mean_year_plotly():
         margin=dict(t=60, b=100),
         hovermode='x unified'
     )
-    # fig.show()
 
+    _mean_year_fig = fig
     return fig
