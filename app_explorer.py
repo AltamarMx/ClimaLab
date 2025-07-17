@@ -5,7 +5,7 @@ import io
 
 from utils.config import name, db_name
 
-from components.explorador import panel_explorador, panel_estadistica
+from components.explorador import panel_descarga, panel_explorador, panel_estadistica
 from components.panels import (
     panel_documentacion,
     panel_trayectoriasolar,
@@ -29,8 +29,9 @@ app_ui = ui.page_fillable(
         ui.nav_panel(
             name,
             ui.navset_card_tab(
-                panel_explorador(), 
-                panel_estadistica(), 
+                panel_descarga(),
+                panel_explorador(),
+                panel_estadistica(),
                 id="climalab_subtabs"
             ),
         ),
