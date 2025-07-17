@@ -41,6 +41,42 @@ def panel_explorador():
         info_rango,
         ui.hr(),
         ui.output_plot("plot_explorer"),
+    )
+
+
+def panel_descarga():
+    conn = duckdb.connect(database=db_name, read_only=True)
+    min_date, max_date = conn.execute(
+        "SELECT min(date), max(date) FROM lecturas"
+    ).fetchone()
+    conn.close()
+
+    min_date_dt = pd.to_datetime(min_date)
+    max_date_dt = pd.to_datetime(max_date)
+    start_last_year_dt = max(
+        max_date_dt - pd.DateOffset(days=120) + pd.Timedelta(days=1),
+        min_date_dt,
+    )
+
+    info_rango = ui.h6(
+        f"Datos disponibles de {min_date_dt.date()} al {max_date_dt.date()}",
+        class_="text-muted mb-2 text-center",
+    )
+    return ui.nav_panel(
+        "Descarga",
+        ui.input_date_range(
+            "fechas_descarga",
+            "Fechas:",
+            start=str(start_last_year_dt.date()),
+            end=str(max_date_dt.date()),
+            min=str(min_date_dt.date()),
+            max=str(max_date_dt.date()),
+            language="es",
+            separator="a",
+        ),
+        ui.hr(),
+        info_rango,
+        ui.hr(),
         ui.div(
             ui.download_button(
                 "dl_parquet",
@@ -50,7 +86,7 @@ def panel_explorador():
                 "dl_csv",
                 "Download csv",
             ),
-            class_="d-flex justify-content-center gap-1 "
+            class_="d-flex justify-content-center gap-1",
         ),
     )
 

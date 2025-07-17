@@ -35,10 +35,10 @@ def explorer_server(input, output, session):
     @output
     @render.download(filename="ClimaLab.parquet", media_type="application/x-parquet")
     def dl_parquet():
-        fechas = input.fechas()
+        fechas = input.fechas_descarga()
         if fechas is None:
             return
-        df = _query_df(fechas) 
+        df = _query_df(fechas)
         with io.BytesIO() as buf:
             df.to_parquet(buf, index=True, engine="pyarrow")
             buf.seek(0)
@@ -47,7 +47,7 @@ def explorer_server(input, output, session):
     @output
     @render.download(filename="ClimaLab.csv", media_type="text/csv")
     def dl_csv():
-        fechas = input.fechas()
+        fechas = input.fechas_descarga()
         if fechas is None:
             return
         df = _query_df(fechas)
