@@ -26,7 +26,7 @@ def panel_explorador():
         class_="text-muted mb-2 text-center"   # opcional: gris y peque-ño margen inferior
     )
     return ui.nav_panel(
-        "Explorador",
+        "Explorar",
         ui.input_date_range(
             "fechas",
             "Fechas:",
@@ -63,7 +63,7 @@ def panel_descarga():
         class_="text-muted mb-2 text-center",
     )
     return ui.nav_panel(
-        "Descarga",
+        "Descargar",
         ui.input_date_range(
             "fechas_descarga",
             "Fechas:",
