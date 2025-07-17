@@ -739,7 +739,9 @@ def plot_mean_year_plotly():
     daily = _get_mean_year_daily().copy()
     daily["range"] = daily["max"] - daily["min"]
     daily = daily.reset_index().rename(columns={"index": "date"})
-    daily["date"] = daily["date"].astype("object")
+    # daily["date"] = daily["date"].astype("object")    
+    daily["date"] = daily["date"].dt.strftime("%Y-%m-%d")
+
 
     fig = go.Figure()
 
