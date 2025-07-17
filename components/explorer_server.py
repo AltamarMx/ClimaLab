@@ -33,7 +33,10 @@ def explorer_server(input, output, session):
         return df
 
     @output
-    @render.download(filename="ClimaLab.parquet", media_type="application/x-parquet")
+    @render.download(
+        filename=lambda: f"ClimaLab_{input.fechas_descarga()[0]}_{input.fechas_descarga()[1]}.parquet",
+        media_type="application/x-parquet",
+    )
     def dl_parquet():
         fechas = input.fechas_descarga()
         if fechas is None:
@@ -45,7 +48,10 @@ def explorer_server(input, output, session):
             yield buf.getvalue()
 
     @output
-    @render.download(filename="ClimaLab.csv", media_type="text/csv")
+    @render.download(
+        filename=lambda: f"ClimaLab_{input.fechas_descarga()[0]}_{input.fechas_descarga()[1]}.csv",
+        media_type="text/csv",
+    )
     def dl_csv():
         fechas = input.fechas_descarga()
         if fechas is None:
