@@ -285,7 +285,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     async def create_mean_year():
         print('hola')
         
-        con = duckdb.connect('./climalab.db', read_only=True)
+        con = duckdb.connect(db_name, read_only=True)
 
         # 1) Carga  df, cierra db y pivoteo
         query = f"""

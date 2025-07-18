@@ -4,17 +4,18 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
+from utils.config import mean_year_name
 
 
 # %%
-df = pd.read_parquet('./database/mean-year.parquet')
+df = pd.read_parquet(mean_year_name)
 df.info()
-# %%
-df.index.month
+# %
+df
 # %%
 
 # 1) Cálculo diario (igual que antes)
-daily = df['tdb_mean'].resample('D').agg(['min','max','mean'])
+daily = df['tdb'].resample('D').agg(['min','max','mean'])
 daily['range'] = daily['max'] - daily['min']
 daily.reset_index(inplace=True)
 print(daily)

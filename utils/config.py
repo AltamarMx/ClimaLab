@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 
 variables = {
     "TIMESTAMP":"timestamp",
@@ -41,9 +42,14 @@ solar_constant = 1361
 # Drop outliers before saving in database 
 drop_outliers = True
 
+# Resolve project root so paths work regardless of the current working
+# directory.  ``config.py`` lives inside ``utils/`` therefore the root is the
+# parent directory of this file.
+_ROOT = Path(__file__).resolve().parent.parent
+
 # Database name
-db_name = 'ClimaLab.db'
-mean_year_name = 'database/mean-year.parquet'
+db_name = str(_ROOT / 'ClimaLab.db')
+mean_year_name = str(_ROOT / 'database' / 'mean-year.parquet')
 site_id = 2226728
 data_tz = -6 
 # — Alturas de medición (en metros) para cada variable —
