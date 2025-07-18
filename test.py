@@ -1,10 +1,10 @@
 # %%
 import pandas as pd
 import duckdb
-from utils.config import mean_year
+from utils.config import mean_year, db_name, mean_year_name
 
 # %%
-con = duckdb.connect('./climalab.db', read_only=True)
+con = duckdb.connect(db_name, read_only=True)
 query = "SELECT * FROM lecturas ORDER BY date"
 df = con.execute(query).fetchdf().pivot(index="date", columns="variable", values="value")
 
@@ -40,7 +40,7 @@ typical_dates = pd.to_datetime({
 })
 stats.index = typical_dates
 stats = stats.sort_index()
-stats.to_parquet('./database/mean-year.parquet')
+stats.to_parquet(mean_year_name)
 # %%
 
 
