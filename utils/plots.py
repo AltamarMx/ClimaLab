@@ -37,8 +37,8 @@ def _get_mean_year_daily():
     """Load and cache daily aggregates of ``tdb_mean``."""
     global _mean_year_daily
     if _mean_year_daily is None:
-        df = pd.read_parquet(mean_year_name, columns=["tdb_mean"])
-        _mean_year_daily = df["tdb_mean"].resample("D").agg(["min", "max", "mean"])
+        df = pd.read_parquet(mean_year_name, columns=["tdb"])
+        _mean_year_daily = df["tdb"].resample("D").agg(["min", "max", "mean"])
     return _mean_year_daily
 
 
